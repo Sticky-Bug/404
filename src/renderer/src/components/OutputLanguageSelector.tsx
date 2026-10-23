@@ -1,9 +1,5 @@
 import React, { useState, useRef, useEffect, useId } from 'react'
-import {
-  SUPPORTED_LANGUAGES,
-  getLanguageByCode,
-  type LanguageOption
-} from '../data/languages'
+import { SUPPORTED_LANGUAGES, getLanguageByCode, type LanguageOption } from '../data/languages'
 
 interface OutputLanguageSelectorProps {
   selectedCode: string
@@ -44,10 +40,7 @@ export const OutputLanguageSelector: React.FC<OutputLanguageSelectorProps> = ({
     if (!isOpen) return
 
     const handleOutsideClick = (e: MouseEvent): void => {
-      if (
-        containerRef.current &&
-        !containerRef.current.contains(e.target as Node)
-      ) {
+      if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
         setIsOpen(false)
         setSearchQuery('')
       }
@@ -73,9 +66,7 @@ export const OutputLanguageSelector: React.FC<OutputLanguageSelectorProps> = ({
   // Scroll highlighted item into view
   useEffect(() => {
     if (isOpen && listRef.current) {
-      const activeItem = listRef.current.children[
-        highlightedIndex
-      ] as HTMLElement
+      const activeItem = listRef.current.children[highlightedIndex] as HTMLElement
       if (activeItem) {
         activeItem.scrollIntoView({ block: 'nearest' })
       }
@@ -101,9 +92,7 @@ export const OutputLanguageSelector: React.FC<OutputLanguageSelectorProps> = ({
     buttonRef.current?.focus()
   }
 
-  const handleButtonKeyDown = (
-    e: React.KeyboardEvent<HTMLButtonElement>
-  ): void => {
+  const handleButtonKeyDown = (e: React.KeyboardEvent<HTMLButtonElement>): void => {
     if (disabled) return
     if (e.key === 'ArrowDown' || e.key === 'Enter' || e.key === ' ') {
       e.preventDefault()
@@ -112,9 +101,7 @@ export const OutputLanguageSelector: React.FC<OutputLanguageSelectorProps> = ({
     }
   }
 
-  const handleSearchKeyDown = (
-    e: React.KeyboardEvent<HTMLInputElement>
-  ): void => {
+  const handleSearchKeyDown = (e: React.KeyboardEvent<HTMLInputElement>): void => {
     if (e.key === 'Escape') {
       e.preventDefault()
       setIsOpen(false)
@@ -125,17 +112,13 @@ export const OutputLanguageSelector: React.FC<OutputLanguageSelectorProps> = ({
 
     if (e.key === 'ArrowDown') {
       e.preventDefault()
-      setHighlightedIndex((prev) =>
-        prev < filteredLanguages.length - 1 ? prev + 1 : 0
-      )
+      setHighlightedIndex((prev) => (prev < filteredLanguages.length - 1 ? prev + 1 : 0))
       return
     }
 
     if (e.key === 'ArrowUp') {
       e.preventDefault()
-      setHighlightedIndex((prev) =>
-        prev > 0 ? prev - 1 : filteredLanguages.length - 1
-      )
+      setHighlightedIndex((prev) => (prev > 0 ? prev - 1 : filteredLanguages.length - 1))
       return
     }
 
@@ -174,10 +157,7 @@ export const OutputLanguageSelector: React.FC<OutputLanguageSelectorProps> = ({
         <span className="lang-trigger-label">
           Language: <strong>{currentLang.label}</strong>
         </span>
-        <span
-          className={`lang-trigger-chevron ${isOpen ? 'up' : 'down'}`}
-          aria-hidden="true"
-        >
+        <span className={`lang-trigger-chevron ${isOpen ? 'up' : 'down'}`} aria-hidden="true">
           ▾
         </span>
       </button>
@@ -231,8 +211,7 @@ export const OutputLanguageSelector: React.FC<OutputLanguageSelectorProps> = ({
               </li>
             ) : (
               filteredLanguages.map((lang, index) => {
-                const isSelected =
-                  lang.code.toLowerCase() === selectedCode.toLowerCase()
+                const isSelected = lang.code.toLowerCase() === selectedCode.toLowerCase()
                 const isHighlighted = index === highlightedIndex
 
                 return (
@@ -249,9 +228,7 @@ export const OutputLanguageSelector: React.FC<OutputLanguageSelectorProps> = ({
                     <div className="lang-item-main">
                       <span className="lang-item-label">{lang.label}</span>
                       {lang.nativeName && lang.nativeName !== lang.label && (
-                        <span className="lang-item-native">
-                          ({lang.nativeName})
-                        </span>
+                        <span className="lang-item-native">({lang.nativeName})</span>
                       )}
                     </div>
 

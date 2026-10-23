@@ -15,14 +15,17 @@ export interface UseSpeechRecognitionReturn {
   isSupported: boolean
   isListening: boolean
   error: string | null
+  permissionDenied: boolean
+  setPermissionDenied: (denied: boolean) => void
   clearError: () => void
+  requestMicrophonePermission: () => Promise<boolean>
   startListening: (callbacks?: {
     onInterim?: (interim: string) => void
     onFinal?: (final: string) => void
     onTranscript?: (fullTranscript: string, isFinal: boolean) => void
-  }) => void
+  }) => Promise<void>
   stopListening: () => void
-  toggleListening: () => void
+  toggleListening: () => Promise<void>
 }
 
 export function useSpeechRecognition(
@@ -32,6 +35,7 @@ export function useSpeechRecognition(
 
   const [isListening, setIsListening] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [permissionDenied, setPermissionDenied] = useState(false)
 
   const recognitionRef = useRef<ISpeechRecognition | null>(null)
   const callbacksRef = useRef<{
@@ -47,6 +51,7 @@ export function useSpeechRecognition(
 
   const clearError = useCallback(() => {
     setError(null)
+    setPermissionDenied(false)
   }, [])
 
   const stopListening = useCallback(() => {
@@ -61,12 +66,40 @@ export function useSpeechRecognition(
     setIsListening(false)
   }, [])
 
+  // Explicitly prompt the user/browser for microphone access using getUserMedia
+  const requestMicrophonePermission = useCallback(async (): Promise<boolean> => {
+    if (typeof navigator === 'undefined' || !navigator.mediaDevices?.getUserMedia) {
+      return true
+    }
+
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true })
+      // Permission granted: immediately release the stream so audio device is free
+      stream.getTracks().forEach((track) => track.stop())
+      setPermissionDenied(false)
+      setError(null)
+      return true
+    } catch (err: unknown) {
+      console.warn('Microphone permission request was denied or blocked:', err)
+      setPermissionDenied(true)
+      setError('Microphone access denied. Please grant microphone permission.')
+      return false
+    }
+  }, [])
+
   const startListening = useCallback(
-    (callbacks = {}) => {
+    async (callbacks = {}) => {
       clearError()
 
       if (!isSupported) {
         setError('Speech recognition is not supported in this browser or environment.')
+        return
+      }
+
+      // Pre-flight check: ensure user has granted microphone permission
+      const hasPermission = await requestMicrophonePermission()
+      if (!hasPermission) {
+        setIsListening(false)
         return
       }
 
@@ -103,6 +136,7 @@ export function useSpeechRecognition(
         recognition.onstart = () => {
           setIsListening(true)
           setError(null)
+          setPermissionDenied(false)
         }
 
         recognition.onresult = (event: SpeechRecognitionEvent) => {
@@ -147,6 +181,7 @@ export function useSpeechRecognition(
           switch (errCode) {
             case 'not-allowed':
               friendlyMessage = 'Microphone access denied. Please allow microphone permissions.'
+              setPermissionDenied(true)
               break
             case 'no-speech':
               friendlyMessage = 'No speech was detected. Please try speaking again.'
@@ -183,14 +218,14 @@ export function useSpeechRecognition(
         )
       }
     },
-    [clearError, continuous, interimResults, isSupported, lang]
+    [clearError, continuous, interimResults, isSupported, lang, requestMicrophonePermission]
   )
 
-  const toggleListening = useCallback(() => {
+  const toggleListening = useCallback(async () => {
     if (isListening) {
       stopListening()
     } else {
-      startListening()
+      await startListening()
     }
   }, [isListening, startListening, stopListening])
 
@@ -212,7 +247,10 @@ export function useSpeechRecognition(
     isSupported,
     isListening,
     error,
+    permissionDenied,
+    setPermissionDenied,
     clearError,
+    requestMicrophonePermission,
     startListening,
     stopListening,
     toggleListening

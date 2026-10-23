@@ -34,20 +34,20 @@ just to add this control.
 
 ### Selector behavior
 
--   Default selection: **Auto**.
--   Clicking it opens a searchable menu or compact dropdown.
--   Include at least: Auto, English, Spanish, French, German,
-    Portuguese, Italian, Russian, Ukrainian, Arabic, Hindi, Bengali,
-    Chinese (Simplified), Chinese (Traditional), Japanese, Korean,
-    Turkish, Dutch, Polish, Indonesian, and Vietnamese.
--   Keep the language list easy to extend.
--   Clearly show the selected language.
--   Make it keyboard accessible with an accessible name such as
-    `Output language`.
--   A globe icon is fine. Do not rely on flags as the only language
-    indicator.
--   Keep the choice for the current session. Persist it across restarts
-    only if that matches the app's existing settings conventions.
+- Default selection: **Auto**.
+- Clicking it opens a searchable menu or compact dropdown.
+- Include at least: Auto, English, Spanish, French, German,
+  Portuguese, Italian, Russian, Ukrainian, Arabic, Hindi, Bengali,
+  Chinese (Simplified), Chinese (Traditional), Japanese, Korean,
+  Turkish, Dutch, Polish, Indonesian, and Vietnamese.
+- Keep the language list easy to extend.
+- Clearly show the selected language.
+- Make it keyboard accessible with an accessible name such as
+  `Output language`.
+- A globe icon is fine. Do not rely on flags as the only language
+  indicator.
+- Keep the choice for the current session. Persist it across restarts
+  only if that matches the app's existing settings conventions.
 
 ## 3. Core behavior
 
@@ -97,10 +97,10 @@ translation.
 
 Language selection and persona selection are independent:
 
--   **Persona** determines how the message sounds and how it adapts to
-    the audience.
--   **Output language** determines the language of the final variant.
--   Both settings must be applied in the same generation operation.
+- **Persona** determines how the message sounds and how it adapts to
+  the audience.
+- **Output language** determines the language of the final variant.
+- Both settings must be applied in the same generation operation.
 
 Examples: - Friendly + Russian → friendly Russian output. - Lawyer /
 Legal-style + Hindi → formal Hindi output without inventing legal advice
@@ -149,51 +149,51 @@ constraints.
 
 ## 6. Output structure and UI compatibility
 
--   Keep the existing result format and persona-variant structure
-    compatible with the feature.
--   If multiple persona variants are generated, every variant must use
-    the selected output language.
--   Do not insert language-detection commentary or translation notes
-    into the rewritten message unless the product already displays
-    explanations separately.
--   Titles, summaries, and rationale fields should follow the existing
-    localization convention. The actual generated message must follow
-    the selected output language.
--   The comparison/diff view must still work when the languages differ.
-    Make clear that a cross-language diff is a comparison, not a
-    word-for-word edit history.
--   Copy actions must copy only the generated message, not prompt
-    instructions or language metadata.
+- Keep the existing result format and persona-variant structure
+  compatible with the feature.
+- If multiple persona variants are generated, every variant must use
+  the selected output language.
+- Do not insert language-detection commentary or translation notes
+  into the rewritten message unless the product already displays
+  explanations separately.
+- Titles, summaries, and rationale fields should follow the existing
+  localization convention. The actual generated message must follow
+  the selected output language.
+- The comparison/diff view must still work when the languages differ.
+  Make clear that a cross-language diff is a comparison, not a
+  word-for-word edit history.
+- Copy actions must copy only the generated message, not prompt
+  instructions or language metadata.
 
 ## 7. Offline fallback
 
 When cloud providers are unavailable:
 
--   Preserve the selected language setting.
--   In Auto mode, do not claim the fallback can reliably detect and
-    rewrite every language if it only uses English-oriented rules.
--   For an explicitly selected language, do not present an English-only
-    rule-based rewrite as a successful translation.
--   If the offline engine cannot safely produce the requested language,
-    show a clear message such as:
-    `Multilingual rewriting is unavailable in offline fallback. Reconnect to an AI provider or choose a supported offline language.`
--   Only claim offline multilingual support for languages and behaviors
-    actually implemented and tested.
--   A configured local model may be used if it supports the selected
-    language and fits the app's provider fallback rules.
+- Preserve the selected language setting.
+- In Auto mode, do not claim the fallback can reliably detect and
+  rewrite every language if it only uses English-oriented rules.
+- For an explicitly selected language, do not present an English-only
+  rule-based rewrite as a successful translation.
+- If the offline engine cannot safely produce the requested language,
+  show a clear message such as:
+  `Multilingual rewriting is unavailable in offline fallback. Reconnect to an AI provider or choose a supported offline language.`
+- Only claim offline multilingual support for languages and behaviors
+  actually implemented and tested.
+- A configured local model may be used if it supports the selected
+  language and fits the app's provider fallback rules.
 
 ## 8. Error handling and edge cases
 
 Handle these cases without crashing:
 
--   Empty or whitespace-only drafts.
--   Very short or ambiguous drafts (for example, `OK` or `No`).
--   Mixed-language drafts.
--   Names, dates, numbers, URLs, email addresses, code, and quoted text.
--   Unsupported or unavailable language choices.
--   Provider failures, timeouts, and malformed model output.
--   A provider returning the wrong language.
--   The language changing while generation is in progress.
+- Empty or whitespace-only drafts.
+- Very short or ambiguous drafts (for example, `OK` or `No`).
+- Mixed-language drafts.
+- Names, dates, numbers, URLs, email addresses, code, and quoted text.
+- Unsupported or unavailable language choices.
+- Provider failures, timeouts, and malformed model output.
+- A provider returning the wrong language.
+- The language changing while generation is in progress.
 
 For wrong-language output, use a limited validation/retry strategy if
 supported. Do not retry indefinitely. If the result still violates the
@@ -229,66 +229,69 @@ the existing secure Electron IPC architecture.
 
 ## 10. Acceptance criteria
 
--   [ ] The language selector appears beside `Convert to Persona`.
--   [ ] Default value is `Auto`.
--   [ ] Auto mode produces Spanish output for a Spanish draft, Russian
-    for Russian, and Hindi for Hindi, assuming the configured provider
-    supports those languages.
--   [ ] Selecting Russian and entering an English draft produces a
-    natural Russian rewrite.
--   [ ] Selecting Hindi and entering an English draft produces a natural
-    Hindi rewrite.
--   [ ] Selecting the source language rewrites naturally without
-    needlessly translating it.
--   [ ] Every persona variant follows the selected language.
--   [ ] Language selection does not reset or override the persona.
--   [ ] Persona selection does not reset the language.
--   [ ] Facts, names, numbers, dates, deadlines, and requests remain
-    intact.
--   [ ] Empty drafts show a clear validation message.
--   [ ] Provider errors and wrong-language outputs are handled
-    gracefully.
--   [ ] An English-only offline fallback never claims to have translated
-    into Russian, Hindi, or another unsupported language.
--   [ ] The selector is keyboard accessible and visually consistent with
-    the app.
--   [ ] Tests cover Auto mode, explicit translation, persona/language
-    combinations, and offline limitations.
+- [ ] The language selector appears beside `Convert to Persona`.
+- [ ] Default value is `Auto`.
+- [ ] Auto mode produces Spanish output for a Spanish draft, Russian
+      for Russian, and Hindi for Hindi, assuming the configured provider
+      supports those languages.
+- [ ] Selecting Russian and entering an English draft produces a
+      natural Russian rewrite.
+- [ ] Selecting Hindi and entering an English draft produces a natural
+      Hindi rewrite.
+- [ ] Selecting the source language rewrites naturally without
+      needlessly translating it.
+- [ ] Every persona variant follows the selected language.
+- [ ] Language selection does not reset or override the persona.
+- [ ] Persona selection does not reset the language.
+- [ ] Facts, names, numbers, dates, deadlines, and requests remain
+      intact.
+- [ ] Empty drafts show a clear validation message.
+- [ ] Provider errors and wrong-language outputs are handled
+      gracefully.
+- [ ] An English-only offline fallback never claims to have translated
+      into Russian, Hindi, or another unsupported language.
+- [ ] The selector is keyboard accessible and visually consistent with
+      the app.
+- [ ] Tests cover Auto mode, explicit translation, persona/language
+      combinations, and offline limitations.
 
 ## 11. Test cases
 
-  -----------------------------------------------------------------------------------------------
-  Input draft                           Selected language Persona           Expected result
-  ------------------------------------- ----------------- ----------------- ---------------------
-  `Please send the report by Friday.`   Auto              Professional      Professional English;
-                                                                            Friday preserved
+---
 
-  Spanish draft                         Auto              Friendly          Friendly Spanish
+Input draft Selected language Persona Expected result
 
-  Russian draft                         Auto              Professional      Professional Russian
+---
 
-  `Please send the report by Friday.`   Russian           Professional      Professional Russian;
-                                                                            deadline preserved
+`Please send the report by Friday.` Auto Professional Professional English;
+Friday preserved
 
-  `I am sorry for the delay.`           Hindi             Diplomatic        Diplomatic Hindi;
-                                                                            apology preserved
+Spanish draft Auto Friendly Friendly Spanish
 
-  French draft                          English           Direct            Direct English
-                                                                            translation/rewrite
+Russian draft Auto Professional Professional Russian
 
-  English draft with URL and order      Japanese          Professional      Japanese output; URL
-  number                                                                    and order number
-                                                                            preserved
+`Please send the report by Friday.` Russian Professional Professional Russian;
+deadline preserved
 
-  Any draft                             Auto              Multiple personas Every variant follows
-                                                                            detected input
-                                                                            language
+`I am sorry for the delay.` Hindi Diplomatic Diplomatic Hindi;
+apology preserved
 
-  English draft                         Russian           Any persona,      Clear
-                                                          offline           limitation/error; no
-                                                          English-only      false claim of
-                                                          fallback          Russian translation
-  -----------------------------------------------------------------------------------------------
+French draft English Direct Direct English
+translation/rewrite
+
+English draft with URL and order Japanese Professional Japanese output; URL
+number and order number
+preserved
+
+Any draft Auto Multiple personas Every variant follows
+detected input
+language
+
+English draft Russian Any persona, Clear
+offline limitation/error; no
+English-only false claim of
+fallback Russian translation
+-----------------------------------------------------------------------------------------------
 
 ## 12. Definition of done
 

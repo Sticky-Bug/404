@@ -1,4 +1,4 @@
-import { ipcMain } from 'electron'
+import { ipcMain, shell, systemPreferences } from 'electron'
 import { z } from 'zod'
 import { keyStore, type ProviderId } from '../security/key-store'
 import { executeRewrite } from '../ai/router'
@@ -194,5 +194,27 @@ export function registerIpcHandlers(): void {
       return { success: false, error: 'Invalid draft data' }
     }
     return gmailService.saveDraft(parsed.data)
+  })
+
+  ipcMain.handle('vibewrite:openMicrophoneSettings', async () => {
+    if (process.platform === 'win32') {
+      await shell.openExternal('ms-settings:privacy-microphone')
+    } else if (process.platform === 'darwin') {
+      await shell.openExternal(
+        'x-apple.systempreferences:com.apple.preference.security?Privacy_Microphone'
+      )
+    }
+    return { success: true }
+  })
+
+  ipcMain.handle('vibewrite:getMicrophoneStatus', async () => {
+    if (process.platform === 'darwin' || process.platform === 'win32') {
+      try {
+        return systemPreferences.getMediaAccessStatus('microphone')
+      } catch {
+        return 'unknown'
+      }
+    }
+    return 'granted'
   })
 }

@@ -720,8 +720,8 @@ export const EmailDeliveryPanel: React.FC<EmailDeliveryPanelProps> = ({
             <div className="sketch-modal-body">
               <div className="oauth-intro-text">
                 <p>
-                  VibeWrite connects securely via Google OAuth 2.0 PKCE. Your password is never
-                  handled or stored by VibeWrite.
+                  Mail B.I.T connects securely via Google OAuth 2.0 PKCE. Your password is never
+                  handled or stored by Mail B.I.T.
                 </p>
               </div>
 

@@ -55,7 +55,10 @@ test('Bilingual: Auto mode prompt builds correct detection instructions', () => 
   assert.match(prompt, /OUTPUT LANGUAGE REQUIREMENT \(AUTO-DETECT\)/)
   assert.match(prompt, /Detect the primary language of the user's draft/)
   assert.match(prompt, /Write the complete rewritten output in that detected language/)
-  assert.match(prompt, /Do NOT translate into English merely because system or application instructions are in English/)
+  assert.match(
+    prompt,
+    /Do NOT translate into English merely because system or application instructions are in English/
+  )
 })
 
 test('Bilingual: Explicit language prompt builds correct mandate instructions', () => {
@@ -64,7 +67,10 @@ test('Bilingual: Explicit language prompt builds correct mandate instructions', 
   assert.match(ruPrompt, /OUTPUT MANDATE: RUSSIAN/)
   assert.match(ruPrompt, /Write the complete rewritten output in \*\*Russian\*\*/)
   assert.match(ruPrompt, /translate and rewrite it into Russian naturally and idiomatically/)
-  assert.match(ruPrompt, /Keep proper names, URLs, code, and content that should not be translated unchanged/)
+  assert.match(
+    ruPrompt,
+    /Keep proper names, URLs, code, and content that should not be translated unchanged/
+  )
 
   // Hindi test
   const hiPrompt = buildLanguagePrompt('hi')
@@ -95,7 +101,13 @@ test('Bilingual: Offline fallback throws clear honest limitation for unsupported
   // Explicit Russian in offline mode
   assert.throws(
     () => {
-      generateBasicOfflineRewrite('Please send the report by Friday.', 'executive', 'balanced', undefined, 'ru')
+      generateBasicOfflineRewrite(
+        'Please send the report by Friday.',
+        'executive',
+        'balanced',
+        undefined,
+        'ru'
+      )
     },
     (err) => {
       assert.match(
@@ -109,10 +121,19 @@ test('Bilingual: Offline fallback throws clear honest limitation for unsupported
   // Explicit Hindi in offline mode
   assert.throws(
     () => {
-      generateBasicOfflineRewrite('I am sorry for the delay.', 'diplomatic', 'balanced', undefined, 'hi')
+      generateBasicOfflineRewrite(
+        'I am sorry for the delay.',
+        'diplomatic',
+        'balanced',
+        undefined,
+        'hi'
+      )
     },
     (err) => {
-      assert.match(err.message, /Multilingual rewriting \(Hindi\) is unavailable in offline fallback/)
+      assert.match(
+        err.message,
+        /Multilingual rewriting \(Hindi\) is unavailable in offline fallback/
+      )
       return true
     }
   )

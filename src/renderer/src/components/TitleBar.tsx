@@ -65,7 +65,7 @@ export const TitleBar: React.FC<TitleBarProps> = ({
         </div>
 
         <div className="titlebar-text">
-          <span className="app-title-main">VibeWrite</span>
+          <span className="app-title-main">Mail B.I.T</span>
           <span className="app-title-badge">Notebook Edition</span>
         </div>
       </div>

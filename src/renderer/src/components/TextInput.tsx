@@ -37,7 +37,10 @@ export const TextInput: React.FC<TextInputProps> = ({
     isSupported,
     isListening,
     error: sttError,
+    permissionDenied,
+    setPermissionDenied,
     clearError,
+    requestMicrophonePermission,
     startListening,
     stopListening
   } = useSpeechRecognition()
@@ -72,15 +75,7 @@ export const TextInput: React.FC<TextInputProps> = ({
     inputRef.current?.focus()
   }
 
-  const handleMicToggle = (e: React.MouseEvent): void => {
-    e.stopPropagation()
-
-    if (isListening) {
-      stopListening()
-      inputRef.current?.focus()
-      return
-    }
-
+  const triggerVoiceStart = (): void => {
     // Capture cursor insertion point and existing text
     const inputEl = inputRef.current
     const selStart =
@@ -106,6 +101,18 @@ export const TextInput: React.FC<TextInputProps> = ({
     })
   }
 
+  const handleMicToggle = (e: React.MouseEvent): void => {
+    e.stopPropagation()
+
+    if (isListening) {
+      stopListening()
+      inputRef.current?.focus()
+      return
+    }
+
+    triggerVoiceStart()
+  }
+
   const charCount = value.length
   const wordCount = value.trim() ? value.trim().split(/\s+/).filter(Boolean).length : 0
 
@@ -123,6 +130,99 @@ export const TextInput: React.FC<TextInputProps> = ({
 
   return (
     <div className="sketch-input-module">
+      {/* Interactive Microphone Permission Dialog if access is blocked */}
+      {permissionDenied && (
+        <div
+          className="sketch-permission-prompt-card"
+          role="alertdialog"
+          aria-modal="true"
+          aria-labelledby="mic-permission-title"
+        >
+          <div className="permission-prompt-header">
+            <span className="permission-prompt-icon" aria-hidden="true">
+              🎙️
+            </span>
+            <div className="permission-prompt-titles">
+              <h4 id="mic-permission-title" className="permission-prompt-title">
+                Microphone Access Needed
+              </h4>
+              <span className="permission-prompt-subtitle">
+                Enable voice dictation for Mail B.I.T
+              </span>
+            </div>
+            <button
+              type="button"
+              className="permission-close-btn"
+              onClick={() => setPermissionDenied(false)}
+              title="Close dialog"
+              aria-label="Close permission prompt"
+            >
+              ✕
+            </button>
+          </div>
+
+          <div className="permission-prompt-body">
+            <p className="permission-prompt-text">
+              <strong>Mail B.I.T</strong> needs microphone permission to transcribe your speech into
+              the draft.
+            </p>
+            <ol className="permission-steps-list">
+              <li>
+                Click <strong>&quot;Allow / Prompt Again&quot;</strong> below and click Allow when
+                prompted.
+              </li>
+              <li>
+                <strong>Windows users:</strong> If Windows blocks desktop apps, open{' '}
+                <em>Windows Settings &gt; Privacy &amp; security &gt; Microphone</em> and ensure{' '}
+                <strong>&quot;Let desktop apps access your microphone&quot;</strong> is switched{' '}
+                <strong>ON</strong>.
+              </li>
+            </ol>
+          </div>
+
+          <div className="permission-prompt-actions">
+            <button
+              type="button"
+              className="permission-primary-btn"
+              onClick={async (e) => {
+                e.stopPropagation()
+                const granted = await requestMicrophonePermission()
+                if (granted) {
+                  triggerVoiceStart()
+                }
+              }}
+            >
+              🎙️ Allow / Prompt Again
+            </button>
+
+            {typeof window !== 'undefined' && window.vibewrite?.openMicrophoneSettings && (
+              <button
+                type="button"
+                className="permission-secondary-btn"
+                onClick={(e) => {
+                  e.stopPropagation()
+                  window.vibewrite?.openMicrophoneSettings?.()
+                }}
+                title="Open Windows Microphone Privacy Settings"
+              >
+                ⚙️ Open Windows Mic Settings
+              </button>
+            )}
+
+            <button
+              type="button"
+              className="permission-cancel-btn"
+              onClick={(e) => {
+                e.stopPropagation()
+                setPermissionDenied(false)
+              }}
+            >
+              Dismiss
+            </button>
+          </div>
+        </div>
+      )}
+
       <div
         className={`sketch-input-container ${isFocused ? 'focused' : ''} ${
           disabled ? 'disabled' : ''
@@ -155,8 +255,8 @@ export const TextInput: React.FC<TextInputProps> = ({
           onBlur={() => setIsFocused(false)}
           placeholder={isListening ? 'Listening to speech...' : PROMPT_HINTS[hintIndex]}
           disabled={disabled || isSubmitting}
-          aria-label="Draft text to rewrite"
-          id="main-vibewrite-input"
+          aria-label="Draft text for Mail B.I.T"
+          id="main-mailbit-input"
           maxLength={10000}
         />
 
@@ -323,6 +423,14 @@ export const TextInput: React.FC<TextInputProps> = ({
               ⚠️
             </span>
             <span className="stt-error-text">{sttError}</span>
+            <button
+              type="button"
+              className="stt-retry-prompt-btn"
+              onClick={() => setPermissionDenied(true)}
+              title="Fix microphone permission"
+            >
+              Fix Permission
+            </button>
             <button
               type="button"
               className="stt-clear-error-btn"

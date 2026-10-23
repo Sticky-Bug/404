@@ -1,5 +1,5 @@
-appId: com.electron.app
-productName: vibewrite
+appId: com.mailbit.app
+productName: Mail B.I.T
 directories:
   buildResources: build
 files:

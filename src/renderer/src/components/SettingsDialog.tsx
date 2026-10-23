@@ -370,7 +370,7 @@ export const SettingsDialog: React.FC<SettingsDialogProps> = ({
                 <div className="auto-banner-content">
                   <h4>Managed AI is Active</h4>
                   <p>
-                    You don&apos;t need to supply any API keys! VibeWrite automatically routes
+                    You don&apos;t need to supply any API keys! Mail B.I.T automatically routes
                     requests through our pre-configured Google Gemini, Groq, and OpenRouter
                     pipelines with offline fallback.
                   </p>

@@ -87,6 +87,8 @@ export interface VibeWriteBridge {
   gmailSaveDraft(
     input: SendEmailInput
   ): Promise<{ success: boolean; draftId?: string; error?: string }>
+  openMicrophoneSettings?(): Promise<{ success: boolean }>
+  getMicrophoneStatus?(): Promise<string>
 }
 
 declare global {

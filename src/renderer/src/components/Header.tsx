@@ -17,7 +17,7 @@ export const Header: React.FC<HeaderProps> = ({ hasBridge, providerStatuses, onO
           V
         </div>
         <div>
-          <span className="brand-name">VibeWrite</span>
+          <span className="brand-name">Mail B.I.T</span>
           <span className="brand-tagline">Persona Rewrite Studio</span>
         </div>
       </div>

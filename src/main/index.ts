@@ -12,7 +12,7 @@ function createWindow(): void {
     width: 1023,
     height: 579,
     useContentSize: true,
-    title: 'VibeWrite',
+    title: 'Mail B.I.T',
     show: false,
     autoHideMenuBar: true,
     ...(process.platform === 'linux' ? { icon } : {}),
@@ -48,12 +48,43 @@ app.whenReady().then(() => {
   electronApp.setAppUserModelId('com.vibewrite.app')
 
   // Handle microphone permissions for speech recognition
-  session.defaultSession.setPermissionRequestHandler((_webContents, permission, callback) => {
-    if (permission === 'media') {
-      callback(true)
-      return
+  session.defaultSession.setPermissionRequestHandler(
+    (_webContents, permission, callback, details) => {
+      const permStr = permission as string
+      const mediaTypes =
+        details && 'mediaTypes' in details
+          ? (details as { mediaTypes?: string[] }).mediaTypes
+          : undefined
+      if (
+        permStr === 'media' ||
+        permStr === 'microphone' ||
+        permStr === 'audio-capture' ||
+        permStr === 'mediaKeySystem' ||
+        (Array.isArray(mediaTypes) && mediaTypes.includes('audio'))
+      ) {
+        callback(true)
+        return
+      }
+      callback(false)
     }
-    callback(false)
+  )
+
+  session.defaultSession.setPermissionCheckHandler((_webContents, permission, _origin, details) => {
+    const permStr = permission as string
+    const mediaTypes =
+      details && 'mediaTypes' in details
+        ? (details as { mediaTypes?: string[] }).mediaTypes
+        : undefined
+    if (
+      permStr === 'media' ||
+      permStr === 'microphone' ||
+      permStr === 'audio-capture' ||
+      permStr === 'mediaKeySystem' ||
+      (Array.isArray(mediaTypes) && mediaTypes.includes('audio'))
+    ) {
+      return true
+    }
+    return false
   })
 
   // Load safeStorage encrypted keys

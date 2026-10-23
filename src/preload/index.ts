@@ -17,7 +17,9 @@ const vibewriteBridge = {
     ipcRenderer.invoke('vibewrite:gmailConnect', credentials),
   gmailDisconnect: () => ipcRenderer.invoke('vibewrite:gmailDisconnect'),
   gmailSendEmail: (input: unknown) => ipcRenderer.invoke('vibewrite:gmailSendEmail', input),
-  gmailSaveDraft: (input: unknown) => ipcRenderer.invoke('vibewrite:gmailSaveDraft', input)
+  gmailSaveDraft: (input: unknown) => ipcRenderer.invoke('vibewrite:gmailSaveDraft', input),
+  openMicrophoneSettings: () => ipcRenderer.invoke('vibewrite:openMicrophoneSettings'),
+  getMicrophoneStatus: () => ipcRenderer.invoke('vibewrite:getMicrophoneStatus')
 }
 
 if (process.contextIsolated) {

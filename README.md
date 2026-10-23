@@ -1,6 +1,6 @@
-# VibeWrite ✍️✨
+# Mail B.I.T ✍️✨
 
-An offline-first, notebook-themed Electron desktop application built with React, TypeScript, and modern AI orchestration. VibeWrite rewrites your raw drafts into 8 distinct emotional personas and connects directly to Gmail for seamless email dispatch.
+An offline-first, notebook-themed Electron desktop application built with React, TypeScript, and modern AI orchestration. Mail B.I.T rewrites your raw drafts into 8 distinct emotional personas and connects directly to Gmail for seamless email dispatch.
 
 ---
 

@@ -10,6 +10,8 @@ export interface RewriteResultData {
   model: string
   fallbackUsed: boolean
   isOffline: boolean
+  language?: string
+  languageLabel?: string
   error?: string
 }
 
@@ -59,6 +61,11 @@ export const ResultSketchCard: React.FC<ResultSketchCardProps> = ({
             <span className="sketch-result-tag">
               {result.isOffline ? 'Offline Basic Mode' : `${result.provider} (${result.model})`}
               {result.fallbackUsed && ' • Fallback'}
+            </span>
+          )}
+          {result?.languageLabel && (
+            <span className="sketch-result-tag" title="Selected Output Language">
+              🌐 {result.languageLabel}
             </span>
           )}
           {result && !result.error && <span className="sketch-result-tag">{wordCount} words</span>}

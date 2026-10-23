@@ -13,7 +13,9 @@ import { TextInput } from './components/TextInput'
 import { VibathonHeading } from './components/VibathonHeading'
 import { ToneSelector } from './components/ToneSelector'
 import { TONES_CONFIG } from './data/tones'
+import { getLanguageByCode } from './data/languages'
 import { ResultSketchCard, type RewriteResultData } from './components/ResultSketchCard'
+import { OutputLanguageSelector } from './components/OutputLanguageSelector'
 import { EmailDeliveryPanel } from './components/EmailDeliveryPanel'
 import { SettingsDialog } from './components/SettingsDialog'
 import { StatusMessage, type StatusToast } from './components/StatusMessage'
@@ -21,6 +23,7 @@ import { StatusMessage, type StatusToast } from './components/StatusMessage'
 export function App(): React.JSX.Element {
   const [draft, setDraft] = useState<string>('')
   const [selectedToneId, setSelectedToneId] = useState<string>('ceo')
+  const [selectedLanguage, setSelectedLanguage] = useState<string>('auto')
   const [isGenerating, setIsGenerating] = useState<boolean>(false)
   const [result, setResult] = useState<RewriteResultData | null>(null)
   const [isSettingsOpen, setIsSettingsOpen] = useState<boolean>(false)
@@ -121,6 +124,8 @@ export function App(): React.JSX.Element {
     const activeTone = TONES_CONFIG.find((t) => t.id === selectedToneId)
     const toneLabel = activeTone ? activeTone.label : selectedToneId
     const mapping = getPersonaMapping(selectedToneId)
+    const currentLanguage = selectedLanguage
+    const langOption = getLanguageByCode(currentLanguage)
 
     setIsGenerating(true)
     setResult(null)
@@ -132,11 +137,13 @@ export function App(): React.JSX.Element {
         setResult({
           toneLabel,
           originalDraft: trimmed,
-          rewrittenText: `[${toneLabel} Vibe]: ${trimmed} (Standalone preview mode: Electron bridge not detected. Connect to User 2 bridge for live AI rewrites).`,
+          rewrittenText: `[${toneLabel} Vibe${langOption.isAuto ? '' : ` (${langOption.label})`}]: ${trimmed} (Standalone preview mode: Electron bridge not detected. Connect to User 2 bridge for live AI rewrites).`,
           provider: 'local',
           model: 'preview-engine',
           fallbackUsed: false,
-          isOffline: true
+          isOffline: true,
+          language: currentLanguage,
+          languageLabel: langOption.isAuto ? undefined : langOption.label
         })
       }, 700)
       return
@@ -147,7 +154,8 @@ export function App(): React.JSX.Element {
         draft: trimmed,
         personaId: mapping.personaId,
         intensity: mapping.intensity,
-        customInstruction: mapping.customInstruction
+        customInstruction: mapping.customInstruction,
+        language: currentLanguage
       })
 
       setIsGenerating(false)
@@ -160,7 +168,9 @@ export function App(): React.JSX.Element {
           provider: response.provider,
           model: response.model,
           fallbackUsed: response.fallbackUsed,
-          isOffline: response.provider === 'local'
+          isOffline: response.provider === 'local',
+          language: currentLanguage,
+          languageLabel: langOption.isAuto ? undefined : langOption.label
         })
 
         // Celebratory confetti burst
@@ -179,6 +189,8 @@ export function App(): React.JSX.Element {
           model: 'none',
           fallbackUsed: false,
           isOffline: false,
+          language: currentLanguage,
+          languageLabel: langOption.isAuto ? undefined : langOption.label,
           error: `${response.error} (Attempted: ${response.providersAttempted.join(', ')})`
         })
       }
@@ -192,6 +204,8 @@ export function App(): React.JSX.Element {
         model: 'none',
         fallbackUsed: false,
         isOffline: false,
+        language: currentLanguage,
+        languageLabel: langOption.isAuto ? undefined : langOption.label,
         error: err instanceof Error ? err.message : 'Unknown generation error'
       })
     }
@@ -203,6 +217,8 @@ export function App(): React.JSX.Element {
     const activeTone = TONES_CONFIG.find((t) => t.id === selectedToneId)
     const toneLabel = activeTone ? activeTone.label : selectedToneId
     const mapping = getPersonaMapping(selectedToneId)
+    const currentLanguage = selectedLanguage
+    const langOption = getLanguageByCode(currentLanguage)
 
     setIsGenerating(true)
 
@@ -211,7 +227,8 @@ export function App(): React.JSX.Element {
         draft: draft.trim(),
         personaId: mapping.personaId,
         intensity: mapping.intensity,
-        customInstruction: mapping.customInstruction
+        customInstruction: mapping.customInstruction,
+        language: currentLanguage
       })
 
       setIsGenerating(false)
@@ -224,7 +241,9 @@ export function App(): React.JSX.Element {
           provider: res.provider,
           model: res.model,
           fallbackUsed: res.fallbackUsed,
-          isOffline: true
+          isOffline: true,
+          language: currentLanguage,
+          languageLabel: langOption.isAuto ? undefined : langOption.label
         })
       } else {
         setResult({
@@ -235,6 +254,8 @@ export function App(): React.JSX.Element {
           model: 'basic',
           fallbackUsed: false,
           isOffline: true,
+          language: currentLanguage,
+          languageLabel: langOption.isAuto ? undefined : langOption.label,
           error: res.error
         })
       }
@@ -279,6 +300,30 @@ export function App(): React.JSX.Element {
           isSubmitting={isGenerating}
           placeholder="Enter your text here..."
         />
+
+        {/* 2b. Drafting Action Row: Convert to Persona + Output Language Selector */}
+        <div className="drafting-actions-bar" role="toolbar" aria-label="Drafting actions">
+          <button
+            type="button"
+            className="convert-persona-primary-btn"
+            id="convert-to-persona-btn"
+            onClick={handleSend}
+            disabled={!draft.trim() || isGenerating}
+            title="Convert draft into selected persona (or press Enter)"
+            aria-label="Convert to Persona"
+          >
+            <span className="sparkle-icon" aria-hidden="true">
+              ✨
+            </span>
+            <span>{isGenerating ? 'Converting...' : 'Convert to Persona'}</span>
+          </button>
+
+          <OutputLanguageSelector
+            selectedCode={selectedLanguage}
+            onSelectLanguage={setSelectedLanguage}
+            disabled={isGenerating}
+          />
+        </div>
 
         {/* 3. Section Title: "OUR VIBATHON" */}
         <VibathonHeading />

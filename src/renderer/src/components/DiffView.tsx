@@ -39,7 +39,8 @@ export const DiffView: React.FC<DiffViewProps> = ({ originalText, rewrittenText 
 
       <p className="diff-edit-rate-note">
         * <strong>Approximate text edit rate</strong> measures raw word modifications, not a
-        semantic similarity score or guarantee of preserved meaning.
+        semantic similarity score or guarantee of preserved meaning. For cross-language rewrites,
+        this view highlights structural and textual comparisons rather than word-for-word translation history.
       </p>
 
       <div className="diff-text-flow" role="region" aria-label="Visual diff comparison">

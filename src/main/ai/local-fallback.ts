@@ -1,11 +1,33 @@
 import type { PersonaId, ToneIntensity } from './personas'
+import { getLanguageByCode } from './languages'
 
 export function generateBasicOfflineRewrite(
   draft: string,
   personaId: PersonaId,
   _intensity: ToneIntensity,
-  customInstruction?: string
+  customInstruction?: string,
+  languageCode = 'auto'
 ): { text: string; provider: 'local'; model: string; fallbackUsed: boolean } {
+  const lang = getLanguageByCode(languageCode)
+
+  // 1. If an explicit non-English language was requested, reject with honest limitation message
+  if (!lang.isAuto && lang.code !== 'en') {
+    throw new Error(
+      `Multilingual rewriting (${lang.label}) is unavailable in offline fallback. Reconnect to an AI provider or choose a supported offline language.`
+    )
+  }
+
+  // 2. If Auto mode is selected, check if draft contains non-Latin scripts (Cyrillic, Devanagari, Arabic, CJK, etc.)
+  const hasNonLatinScript =
+    /\p{Script=Cyrillic}|\p{Script=Devanagari}|\p{Script=Arabic}|\p{Script=Han}|\p{Script=Hiragana}|\p{Script=Katakana}|\p{Script=Hangul}/u.test(
+      draft
+    )
+  if (lang.isAuto && hasNonLatinScript) {
+    throw new Error(
+      'Multilingual rewriting is unavailable in offline fallback. Reconnect to an AI provider or choose a supported offline language.'
+    )
+  }
+
   const trimmed = draft.trim()
   const firstSentence = trimmed.split(/[.!?]\s+/)[0] || trimmed
 

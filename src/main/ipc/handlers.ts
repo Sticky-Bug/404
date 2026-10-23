@@ -21,7 +21,8 @@ const RewriteRequestSchema = z.object({
     'custom'
   ]),
   intensity: z.enum(['subtle', 'balanced', 'bold']),
-  customInstruction: z.string().max(300).optional()
+  customInstruction: z.string().max(300).optional(),
+  language: z.string().max(50).optional()
 })
 
 const SetApiKeySchema = z.object({
@@ -117,8 +118,8 @@ export function registerIpcHandlers(): void {
       }
     }
 
-    const { draft, personaId, intensity, customInstruction } = parsed.data
-    return executeRewrite(draft, personaId, intensity, customInstruction)
+    const { draft, personaId, intensity, customInstruction, language } = parsed.data
+    return executeRewrite(draft, personaId, intensity, customInstruction, language)
   })
 
   // Offline basic rewrite
@@ -132,14 +133,28 @@ export function registerIpcHandlers(): void {
       }
     }
 
-    const { draft, personaId, intensity, customInstruction } = parsed.data
-    const res = generateBasicOfflineRewrite(draft, personaId, intensity, customInstruction)
-    return {
-      ok: true,
-      text: res.text,
-      provider: res.provider,
-      model: res.model,
-      fallbackUsed: res.fallbackUsed
+    try {
+      const { draft, personaId, intensity, customInstruction, language } = parsed.data
+      const res = generateBasicOfflineRewrite(
+        draft,
+        personaId,
+        intensity,
+        customInstruction,
+        language
+      )
+      return {
+        ok: true,
+        text: res.text,
+        provider: res.provider,
+        model: res.model,
+        fallbackUsed: res.fallbackUsed
+      }
+    } catch (err: unknown) {
+      return {
+        ok: false,
+        error: err instanceof Error ? err.message : 'Offline rewrite failed',
+        providersAttempted: []
+      }
     }
   })
 

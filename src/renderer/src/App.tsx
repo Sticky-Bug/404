@@ -1,33 +1,53 @@
-import React, { useState, useEffect, useCallback } from 'react'
+import React, { useState, useEffect } from 'react'
+import confetti from 'canvas-confetti'
 import type {
   PersonaId,
   ToneIntensity,
   ProviderStatus,
   RewriteResponse
 } from './types/vibewrite-api'
-import { Header } from './components/Header'
-import { DraftEditor } from './components/DraftEditor'
-import { PersonaPicker } from './components/PersonaPicker'
-import { ToneControl } from './components/ToneControl'
-import { VariantCard, type VariantState } from './components/VariantCard'
+import { BackgroundDoodles } from './components/BackgroundDoodles'
+import { LaptopIllustration } from './components/LaptopIllustration'
+import { TextInput } from './components/TextInput'
+import { VibathonHeading } from './components/VibathonHeading'
+import { ToneSelector } from './components/ToneSelector'
+import { TONES_CONFIG } from './data/tones'
+import { ResultSketchCard, type RewriteResultData } from './components/ResultSketchCard'
 import { SettingsDialog } from './components/SettingsDialog'
 import { StatusMessage, type StatusToast } from './components/StatusMessage'
-import { PERSONAS } from './data/personas'
 
 export function App(): React.JSX.Element {
   const [draft, setDraft] = useState<string>('')
-  const [selectedPersonas, setSelectedPersonas] = useState<PersonaId[]>(['executive', 'supportive'])
-  const [customInstruction, setCustomInstruction] = useState<string>('')
-  const [intensity, setIntensity] = useState<ToneIntensity>('balanced')
+  const [selectedToneId, setSelectedToneId] = useState<string>('ceo')
   const [isGenerating, setIsGenerating] = useState<boolean>(false)
-  const [variants, setVariants] = useState<VariantState[]>([])
+  const [result, setResult] = useState<RewriteResultData | null>(null)
   const [isSettingsOpen, setIsSettingsOpen] = useState<boolean>(false)
   const [providerStatuses, setProviderStatuses] = useState<ProviderStatus[]>([])
   const [toast, setToast] = useState<StatusToast | null>(null)
 
   const hasBridge = typeof window !== 'undefined' && Boolean(window.vibewrite)
 
-  const refreshProviderStatuses = useCallback(async (): Promise<void> => {
+  useEffect(() => {
+    let isMounted = true
+    const fetchStatuses = async (): Promise<void> => {
+      if (window.vibewrite) {
+        try {
+          const statuses = await window.vibewrite.getProviderStatus()
+          if (isMounted) {
+            setProviderStatuses(statuses)
+          }
+        } catch (err) {
+          console.error('Failed to query provider status:', err)
+        }
+      }
+    }
+    fetchStatuses()
+    return () => {
+      isMounted = false
+    }
+  }, [])
+
+  const handleRefreshStatuses = async (): Promise<void> => {
     if (window.vibewrite) {
       try {
         const statuses = await window.vibewrite.getProviderStatus()
@@ -36,341 +56,265 @@ export function App(): React.JSX.Element {
         console.error('Failed to query provider status:', err)
       }
     }
-  }, [])
-
-  useEffect(() => {
-    refreshProviderStatuses()
-  }, [refreshProviderStatuses])
-
-  const handleTogglePersona = (id: PersonaId): void => {
-    setSelectedPersonas((prev) => {
-      if (prev.includes(id)) {
-        return prev.filter((p) => p !== id)
-      }
-      if (prev.length >= 3) {
-        return prev
-      }
-      return [...prev, id]
-    })
   }
 
-  const handleClearDraft = (): void => {
-    setDraft('')
+  // Map 8 Vibathon tones to bridge persona & instructions
+  const getPersonaMapping = (
+    toneId: string
+  ): { personaId: PersonaId; intensity: ToneIntensity; customInstruction?: string } => {
+    switch (toneId) {
+      case 'ceo':
+        return { personaId: 'executive', intensity: 'bold' }
+      case 'gen-z':
+        return { personaId: 'gen-z', intensity: 'balanced' }
+      case 'lawyer':
+        return { personaId: 'legal', intensity: 'bold' }
+      case 'professional':
+        return {
+          personaId: 'diplomatic',
+          intensity: 'balanced',
+          customInstruction: 'Crisp, structured corporate professional phrasing'
+        }
+      case 'friendly':
+        return { personaId: 'friendly', intensity: 'balanced' }
+      case 'roast':
+        return {
+          personaId: 'persuasive',
+          intensity: 'bold',
+          customInstruction: 'Witty, playful roasting style with humorous observations'
+        }
+      case 'romantic':
+        return {
+          personaId: 'custom',
+          intensity: 'balanced',
+          customInstruction: 'Warm, poetic, affectionately romantic expression'
+        }
+      case 'motivational':
+        return {
+          personaId: 'supportive',
+          intensity: 'bold',
+          customInstruction: 'High-energy, uplifting motivational coaching tone'
+        }
+      default:
+        return { personaId: 'executive', intensity: 'balanced' }
+    }
   }
 
-  // Copy text to clipboard with error handling
-  const copyToClipboard = async (text: string, label: string): Promise<void> => {
+  const handleCopyText = async (text: string): Promise<void> => {
     try {
       if (!navigator.clipboard) {
-        throw new Error('Clipboard API is unavailable in this environment.')
+        throw new Error('Clipboard is unavailable.')
       }
       await navigator.clipboard.writeText(text)
-      setToast({
-        type: 'info',
-        message: `Copied ${label} to clipboard.`
-      })
-    } catch (err) {
-      setToast({
-        type: 'error',
-        message: `Failed to copy ${label} to clipboard: ${err instanceof Error ? err.message : 'Unknown clipboard error'}`
-      })
+      setToast({ type: 'info', message: 'Copied rewritten vibe to clipboard!' })
+    } catch {
+      setToast({ type: 'error', message: 'Failed to copy to clipboard.' })
     }
   }
 
-  // Copy All action
-  const handleCopyAll = async (): Promise<void> => {
-    const successfulVariants = variants.filter((v) => v.status === 'success' && v.text)
-    if (successfulVariants.length === 0) return
+  const handleSend = async (): Promise<void> => {
+    const trimmed = draft.trim()
+    if (!trimmed) return
 
-    const combinedText = successfulVariants
-      .map((v) => {
-        const def = PERSONAS.find((p) => p.id === v.personaId)
-        const name = def ? def.name : v.personaId
-        return `=== ${name.toUpperCase()} REWRITE ===\n\n${v.text}\n`
-      })
-      .join('\n')
-
-    await copyToClipboard(combinedText, 'all generated variants')
-  }
-
-  // Sequential generation across up to 3 selected personas
-  const handleGenerate = async (): Promise<void> => {
-    const trimmedDraft = draft.trim()
-    if (!trimmedDraft || selectedPersonas.length === 0) return
-
-    if (trimmedDraft.length > 10000) {
-      setToast({
-        type: 'error',
-        message: 'Draft exceeds the 10,000 character maximum limit.'
-      })
-      return
-    }
-
-    if (!window.vibewrite) {
-      setToast({
-        type: 'warning',
-        message:
-          'Electron bridge (window.vibewrite) is not yet active. Please check that User 2 has launched the IPC bridge.'
-      })
-      return
-    }
+    const activeTone = TONES_CONFIG.find((t) => t.id === selectedToneId)
+    const toneLabel = activeTone ? activeTone.label : selectedToneId
+    const mapping = getPersonaMapping(selectedToneId)
 
     setIsGenerating(true)
+    setResult(null)
 
-    // Initialize variant slots as loading or idle
-    const initialVariants: VariantState[] = selectedPersonas.map((id) => ({
-      personaId: id,
-      status: 'idle'
-    }))
-    setVariants(initialVariants)
-
-    // Execute sequentially to prevent cloud rate-limits and show clear progress
-    for (const personaId of selectedPersonas) {
-      setVariants((prev) =>
-        prev.map((v) => (v.personaId === personaId ? { ...v, status: 'loading' } : v))
-      )
-
-      try {
-        const response: RewriteResponse = await window.vibewrite.generateRewrite({
-          draft: trimmedDraft,
-          personaId,
-          intensity,
-          customInstruction: personaId === 'custom' ? customInstruction.trim() : undefined
-        })
-
-        if (response.ok) {
-          setVariants((prev) =>
-            prev.map((v) =>
-              v.personaId === personaId
-                ? {
-                    personaId,
-                    status: 'success',
-                    text: response.text,
-                    provider: response.provider,
-                    model: response.model,
-                    fallbackUsed: response.fallbackUsed
-                  }
-                : v
-            )
-          )
-        } else {
-          setVariants((prev) =>
-            prev.map((v) =>
-              v.personaId === personaId
-                ? {
-                    personaId,
-                    status: 'error',
-                    error: response.error,
-                    providersAttempted: response.providersAttempted
-                  }
-                : v
-            )
-          )
-        }
-      } catch (err: unknown) {
-        setVariants((prev) =>
-          prev.map((v) =>
-            v.personaId === personaId
-              ? {
-                  personaId,
-                  status: 'error',
-                  error: err instanceof Error ? err.message : 'Unknown rewrite error'
-                }
-              : v
-          )
-        )
-      }
-    }
-
-    setIsGenerating(false)
-  }
-
-  // Trigger offline rule-based fallback rewrite
-  const handleTryOffline = async (personaId: PersonaId): Promise<void> => {
     if (!window.vibewrite) {
-      setToast({
-        type: 'error',
-        message: 'VibeWrite bridge is unavailable.'
-      })
+      // Standalone preview fallback when running without Electron bridge
+      setTimeout(() => {
+        setIsGenerating(false)
+        setResult({
+          toneLabel,
+          originalDraft: trimmed,
+          rewrittenText: `[${toneLabel} Vibe]: ${trimmed} (Standalone preview mode: Electron bridge not detected. Connect to User 2 bridge for live AI rewrites).`,
+          provider: 'local',
+          model: 'preview-engine',
+          fallbackUsed: false,
+          isOffline: true
+        })
+      }, 700)
       return
     }
 
-    setVariants((prev) =>
-      prev.map((v) => (v.personaId === personaId ? { ...v, status: 'loading' } : v))
-    )
+    try {
+      const response: RewriteResponse = await window.vibewrite.generateRewrite({
+        draft: trimmed,
+        personaId: mapping.personaId,
+        intensity: mapping.intensity,
+        customInstruction: mapping.customInstruction
+      })
+
+      setIsGenerating(false)
+
+      if (response.ok) {
+        setResult({
+          toneLabel,
+          originalDraft: trimmed,
+          rewrittenText: response.text,
+          provider: response.provider,
+          model: response.model,
+          fallbackUsed: response.fallbackUsed,
+          isOffline: response.provider === 'local'
+        })
+
+        // Celebratory confetti burst
+        confetti({
+          particleCount: 45,
+          spread: 60,
+          origin: { y: 0.75 },
+          colors: ['#11100D', '#E6D7BC', '#D7C19E', '#7C4A3A']
+        })
+      } else {
+        setResult({
+          toneLabel,
+          originalDraft: trimmed,
+          rewrittenText: '',
+          provider: 'none',
+          model: 'none',
+          fallbackUsed: false,
+          isOffline: false,
+          error: `${response.error} (Attempted: ${response.providersAttempted.join(', ')})`
+        })
+      }
+    } catch (err: unknown) {
+      setIsGenerating(false)
+      setResult({
+        toneLabel,
+        originalDraft: trimmed,
+        rewrittenText: '',
+        provider: 'none',
+        model: 'none',
+        fallbackUsed: false,
+        isOffline: false,
+        error: err instanceof Error ? err.message : 'Unknown generation error'
+      })
+    }
+  }
+
+  const handleTryOffline = async (): Promise<void> => {
+    if (!window.vibewrite || !draft.trim()) return
+
+    const activeTone = TONES_CONFIG.find((t) => t.id === selectedToneId)
+    const toneLabel = activeTone ? activeTone.label : selectedToneId
+    const mapping = getPersonaMapping(selectedToneId)
+
+    setIsGenerating(true)
 
     try {
       const res = await window.vibewrite.generateOfflineRewrite({
         draft: draft.trim(),
-        personaId,
-        intensity,
-        customInstruction: personaId === 'custom' ? customInstruction.trim() : undefined
+        personaId: mapping.personaId,
+        intensity: mapping.intensity,
+        customInstruction: mapping.customInstruction
       })
 
+      setIsGenerating(false)
+
       if (res.ok) {
-        setVariants((prev) =>
-          prev.map((v) =>
-            v.personaId === personaId
-              ? {
-                  personaId,
-                  status: 'success',
-                  text: res.text,
-                  provider: res.provider,
-                  model: res.model,
-                  fallbackUsed: res.fallbackUsed
-                }
-              : v
-          )
-        )
+        setResult({
+          toneLabel,
+          originalDraft: draft.trim(),
+          rewrittenText: res.text,
+          provider: res.provider,
+          model: res.model,
+          fallbackUsed: res.fallbackUsed,
+          isOffline: true
+        })
       } else {
-        setVariants((prev) =>
-          prev.map((v) =>
-            v.personaId === personaId
-              ? {
-                  personaId,
-                  status: 'error',
-                  error: res.error
-                }
-              : v
-          )
-        )
+        setResult({
+          toneLabel,
+          originalDraft: draft.trim(),
+          rewrittenText: '',
+          provider: 'local',
+          model: 'basic',
+          fallbackUsed: false,
+          isOffline: true,
+          error: res.error
+        })
       }
     } catch (err) {
-      setVariants((prev) =>
-        prev.map((v) =>
-          v.personaId === personaId
-            ? {
-                personaId,
-                status: 'error',
-                error: err instanceof Error ? err.message : 'Offline rewrite failed'
-              }
-            : v
-        )
-      )
+      setIsGenerating(false)
+      setToast({
+        type: 'error',
+        message: err instanceof Error ? err.message : 'Offline rewrite failed'
+      })
     }
   }
 
-  const hasDraft = draft.trim().length > 0
-  const isDraftOverLimit = draft.length > 10000
-  const canGenerate = hasDraft && !isDraftOverLimit && selectedPersonas.length > 0 && !isGenerating
-
-  const successfulVariantsCount = variants.filter(
-    (v) => v.status === 'success' && Boolean(v.text)
-  ).length
+  const configuredCount = providerStatuses.filter((p) => p.configured).length
 
   return (
-    <div className="app-container">
-      <Header
-        hasBridge={hasBridge}
-        providerStatuses={providerStatuses}
-        onOpenSettings={() => setIsSettingsOpen(true)}
-      />
+    <div className="vibathon-page-container">
+      {/* Decorative Background Ink Doodles in Corners */}
+      <BackgroundDoodles />
 
+      {/* Discreet Navigation / Secret Bar */}
+      <nav className="vibathon-nav-bar" aria-label="Application toolbar">
+        <div className="brand-handwritten">
+          <span>✎ VibeWrite</span>
+        </div>
+
+        <div className="nav-actions">
+          <button
+            type="button"
+            className="sketch-pill-btn"
+            onClick={() => setIsSettingsOpen(true)}
+            id="open-settings-nav-btn"
+            title="Configure AI API keys"
+          >
+            ⚙ Settings {hasBridge && configuredCount > 0 ? `(${configuredCount} ready)` : ''}
+          </button>
+        </div>
+      </nav>
+
+      {/* Status Toasts */}
       <StatusMessage toast={toast} onDismiss={() => setToast(null)} />
 
-      <main className="workspace-grid">
-        {/* Left Column: Draft Input & Persona Selection */}
-        <section className="panel" aria-label="Draft and Configuration">
-          <DraftEditor
-            draft={draft}
-            onChange={setDraft}
-            onClear={handleClearDraft}
-            disabled={isGenerating}
-            maxLength={10000}
-          />
-
-          <PersonaPicker
-            selectedPersonas={selectedPersonas}
-            onTogglePersona={handleTogglePersona}
-            customInstruction={customInstruction}
-            onCustomInstructionChange={setCustomInstruction}
-            disabled={isGenerating}
-            maxSelection={3}
-          />
-
-          <ToneControl intensity={intensity} onChange={setIntensity} disabled={isGenerating} />
-
-          <div className="generate-action-bar">
-            <button
-              type="button"
-              className="btn-primary"
-              onClick={handleGenerate}
-              disabled={!canGenerate}
-              id="generate-variants-btn"
-            >
-              {isGenerating
-                ? 'Generating variants sequentially...'
-                : `Generate ${selectedPersonas.length} variant${
-                    selectedPersonas.length === 1 ? '' : 's'
-                  }`}
-            </button>
-            <p className="privacy-notice">
-              Drafts are sent to configured AI providers only upon clicking Generate. Do not paste
-              sensitive confidential data on unmanaged free tier accounts.
-            </p>
-          </div>
+      {/* Main Interactive Stage */}
+      <main className="vibathon-main-stage">
+        {/* 1. Laptop and Emerging Hand Illustration */}
+        <section className="laptop-stage-area">
+          <LaptopIllustration />
         </section>
 
-        {/* Right Column: Results & Comparison */}
-        <section className="panel" aria-label="Generated Variants and Comparison">
-          <div className="panel-header">
-            <h2 className="panel-title">
-              <span>Persona Results</span>
-              {successfulVariantsCount > 0 && (
-                <span
-                  style={{
-                    fontSize: '0.75rem',
-                    color: 'var(--text-tertiary)',
-                    fontWeight: 400
-                  }}
-                >
-                  ({successfulVariantsCount} completed)
-                </span>
-              )}
-            </h2>
+        {/* 2. Central Beige Pill Input */}
+        <TextInput
+          value={draft}
+          onChange={setDraft}
+          onSubmit={handleSend}
+          isSubmitting={isGenerating}
+          placeholder="Enter your text here..."
+        />
 
-            {successfulVariantsCount > 1 && (
-              <div className="results-header-actions">
-                <button
-                  type="button"
-                  className="btn-secondary"
-                  onClick={handleCopyAll}
-                  id="copy-all-btn"
-                >
-                  Copy all
-                </button>
-              </div>
-            )}
-          </div>
+        {/* 3. Section Title: "OUR VIBATHON" */}
+        <VibathonHeading />
 
-          {variants.length === 0 ? (
-            <div className="empty-state-card">
-              <h3 className="empty-state-title">No variants generated yet</h3>
-              <p className="empty-state-subtitle">
-                Enter your unpolished draft on the left, pick up to three target personas, and click
-                Generate to see side-by-side rewrites and word-level diffs.
-              </p>
-            </div>
-          ) : (
-            <div className="results-list">
-              {variants.map((v) => (
-                <VariantCard
-                  key={v.personaId}
-                  variant={v}
-                  originalDraft={draft}
-                  onCopy={copyToClipboard}
-                  onTryOffline={handleTryOffline}
-                />
-              ))}
-            </div>
-          )}
-        </section>
+        {/* 4. Eight Tone Pills in 2 Centered Rows */}
+        <ToneSelector
+          selectedToneId={selectedToneId}
+          onSelectTone={setSelectedToneId}
+          disabled={isGenerating}
+        />
+
+        {/* 5. Rewritten Result / Diff View Card */}
+        <ResultSketchCard
+          result={result}
+          isLoading={isGenerating}
+          onCopy={handleCopyText}
+          onDismiss={() => setResult(null)}
+          onTryOffline={handleTryOffline}
+        />
       </main>
 
+      {/* Modal Settings Dialog */}
       <SettingsDialog
         isOpen={isSettingsOpen}
         onClose={() => setIsSettingsOpen(false)}
-        onStatusUpdate={refreshProviderStatuses}
+        onStatusUpdate={handleRefreshStatuses}
       />
     </div>
   )

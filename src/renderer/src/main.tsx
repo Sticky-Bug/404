@@ -1,4 +1,5 @@
 import './styles/app.css'
+import './styles/vibathon.css'
 
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'

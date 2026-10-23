@@ -4,6 +4,8 @@ import { electronAPI } from '@electron-toolkit/preload'
 // Expose narrow VibeWrite bridge matching the exact contract
 const vibewriteBridge = {
   getProviderStatus: () => ipcRenderer.invoke('vibewrite:getProviderStatus'),
+  getApiMode: () => ipcRenderer.invoke('vibewrite:getApiMode'),
+  setApiMode: (mode: unknown) => ipcRenderer.invoke('vibewrite:setApiMode', mode),
   generateRewrite: (request: unknown) => ipcRenderer.invoke('vibewrite:generateRewrite', request),
   generateOfflineRewrite: (request: unknown) =>
     ipcRenderer.invoke('vibewrite:generateOfflineRewrite', request),

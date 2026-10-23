@@ -3,14 +3,13 @@ import { buildSystemPrompt, type PersonaId, type ToneIntensity } from '../person
 let cachedGeminiModel: string | null = null
 
 const GEMINI_CANDIDATES = [
-  'gemini-2.5-flash',
+  'gemini-3-flash-preview',
+  'gemini-3.8-flash',
   'gemini-2.0-flash',
-  'gemini-2.0-flash-exp',
-  'gemini-1.5-flash-latest',
+  'gemini-2.5-flash',
+  'gemini-flash-latest',
   'gemini-1.5-flash',
-  'gemini-1.5-flash-8b',
-  'gemini-1.5-pro',
-  'gemini-pro'
+  'gemini-pro-latest'
 ]
 
 async function discoverGeminiModel(apiKey: string): Promise<string> {
@@ -46,7 +45,7 @@ async function discoverGeminiModel(apiKey: string): Promise<string> {
     // ignore list error and fallback to default candidate
   }
 
-  return 'gemini-2.0-flash'
+  return 'gemini-3.8-flash'
 }
 
 async function executeGeminiRequest(

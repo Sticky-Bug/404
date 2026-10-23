@@ -3,15 +3,43 @@ import { join } from 'path'
 import { existsSync, readFileSync, writeFileSync, unlinkSync } from 'fs'
 
 export type ProviderId = 'gemini' | 'groq' | 'openrouter'
+export type ApiMode = 'automatic' | 'custom'
 
 export interface ProviderStatus {
   provider: ProviderId
   configured: boolean
+  isCustom: boolean
+  mode: ApiMode
   lastStatus: 'ok' | 'error' | 'rate-limited' | 'not-tested'
   message?: string
 }
 
+function loadDefaultKeys(): Record<ProviderId, string> {
+  const candidates = [
+    join(__dirname, 'default-keys.json'),
+    join(process.cwd(), 'src', 'main', 'security', 'default-keys.json'),
+    join(app.getPath('userData'), 'default-keys.json')
+  ]
+  for (const p of candidates) {
+    if (existsSync(p)) {
+      try {
+        const raw = readFileSync(p, 'utf-8')
+        return JSON.parse(raw) as Record<ProviderId, string>
+      } catch {
+        // continue
+      }
+    }
+  }
+  return {
+    gemini: process.env.GEMINI_API_KEY || '',
+    groq: process.env.GROQ_API_KEY || '',
+    openrouter: process.env.OPENROUTER_API_KEY || ''
+  }
+}
+
 class KeyStore {
+  private apiMode: ApiMode = 'automatic'
+  private defaultKeys: Record<ProviderId, string> = { gemini: '', groq: '', openrouter: '' }
   private memoryKeys: Map<ProviderId, string> = new Map()
   private statuses: Map<
     ProviderId,
@@ -26,7 +54,27 @@ class KeyStore {
     return join(app.getPath('userData'), 'vibewrite-keys.enc')
   }
 
+  private getModeFilePath(): string {
+    return join(app.getPath('userData'), 'vibewrite-mode.json')
+  }
+
   public init(): void {
+    this.defaultKeys = loadDefaultKeys()
+
+    // Load mode
+    const modePath = this.getModeFilePath()
+    if (existsSync(modePath)) {
+      try {
+        const raw = readFileSync(modePath, 'utf-8')
+        const parsed = JSON.parse(raw) as { mode?: ApiMode }
+        if (parsed.mode === 'automatic' || parsed.mode === 'custom') {
+          this.apiMode = parsed.mode
+        }
+      } catch (err) {
+        console.error('Failed to read api mode file:', err)
+      }
+    }
+
     const filePath = this.getFilePath()
     if (existsSync(filePath) && safeStorage.isEncryptionAvailable()) {
       try {
@@ -44,6 +92,20 @@ class KeyStore {
     }
   }
 
+  public getApiMode(): ApiMode {
+    return this.apiMode
+  }
+
+  public setApiMode(mode: ApiMode): { success: boolean; mode: ApiMode } {
+    this.apiMode = mode
+    try {
+      writeFileSync(this.getModeFilePath(), JSON.stringify({ mode }), 'utf-8')
+    } catch (err) {
+      console.error('Failed to save api mode:', err)
+    }
+    return { success: true, mode: this.apiMode }
+  }
+
   public setKey(provider: ProviderId, key: string): { success: boolean; message: string } {
     const trimmed = key.trim().replace(/^["']|["']$/g, '').trim()
     if (!trimmed) {
@@ -51,7 +113,7 @@ class KeyStore {
     }
 
     this.memoryKeys.set(provider, trimmed)
-    this.statuses.set(provider, { lastStatus: 'not-tested', message: 'Key saved.' })
+    this.statuses.set(provider, { lastStatus: 'not-tested', message: 'Custom key saved.' })
 
     if (safeStorage.isEncryptionAvailable()) {
       try {
@@ -77,7 +139,14 @@ class KeyStore {
   }
 
   public getKey(provider: ProviderId): string | undefined {
-    return this.memoryKeys.get(provider)
+    if (this.apiMode === 'custom') {
+      const customKey = this.memoryKeys.get(provider)
+      if (customKey) return customKey
+      return undefined
+    }
+
+    // Automatic mode: use built-in keys
+    return this.defaultKeys[provider] || loadDefaultKeys()[provider]
   }
 
   public clearKey(provider: ProviderId): { success: boolean; message: string } {
@@ -104,7 +173,7 @@ class KeyStore {
       }
     }
 
-    return { success: true, message: `${provider} key cleared.` }
+    return { success: true, message: `${provider} custom key removed.` }
   }
 
   public updateStatus(
@@ -118,11 +187,16 @@ class KeyStore {
   public getStatusList(): ProviderStatus[] {
     const providers: ProviderId[] = ['gemini', 'groq', 'openrouter']
     return providers.map((provider) => {
-      const configured = Boolean(this.memoryKeys.get(provider))
+      const hasCustom = Boolean(this.memoryKeys.get(provider))
+      const isCustomMode = this.apiMode === 'custom'
+      const configured = isCustomMode ? hasCustom : Boolean(this.defaultKeys[provider] || loadDefaultKeys()[provider])
       const statusInfo = this.statuses.get(provider) || { lastStatus: 'not-tested' }
+
       return {
         provider,
         configured,
+        isCustom: hasCustom,
+        mode: this.apiMode,
         lastStatus: statusInfo.lastStatus,
         message: statusInfo.message
       }

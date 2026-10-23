@@ -33,6 +33,19 @@ const ProviderOnlySchema = z.object({
 })
 
 export function registerIpcHandlers(): void {
+  // Get API Mode (automatic or custom)
+  ipcMain.handle('vibewrite:getApiMode', async () => {
+    return keyStore.getApiMode()
+  })
+
+  // Set API Mode (automatic or custom)
+  ipcMain.handle('vibewrite:setApiMode', async (_, mode) => {
+    if (mode === 'automatic' || mode === 'custom') {
+      return keyStore.setApiMode(mode)
+    }
+    return { success: false, mode: keyStore.getApiMode() }
+  })
+
   // Provider status
   ipcMain.handle('vibewrite:getProviderStatus', async () => {
     return keyStore.getStatusList()

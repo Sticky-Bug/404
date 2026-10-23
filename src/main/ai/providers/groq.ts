@@ -3,13 +3,12 @@ import { buildSystemPrompt, type PersonaId, type ToneIntensity } from '../person
 let cachedGroqModel: string | null = null
 
 const GROQ_CANDIDATES = [
-  'llama-3.1-8b-instant',
+  'openai/gpt-oss-120b',
+  'openai/gpt-oss-20b',
+  'qwen/qwen3.8-27b',
   'llama-3.3-70b-versatile',
-  'llama-3.1-70b-versatile',
-  'llama3-70b-8192',
-  'llama3-8b-8192',
-  'mixtral-8x7b-32768',
-  'gemma2-9b-it'
+  'llama-3.1-8b-instant',
+  'llama3-70b-8192'
 ]
 
 async function discoverGroqModel(apiKey: string): Promise<string> {
@@ -74,7 +73,7 @@ async function executeGroqRequest(
           { role: 'user', content: `Original Draft:\n"""\n${draft}\n"""` }
         ],
         temperature: 0.7,
-        max_tokens: 2048
+        max_tokens: 512
       })
     })
 

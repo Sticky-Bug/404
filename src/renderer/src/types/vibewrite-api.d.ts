@@ -22,9 +22,13 @@ export type RewriteResponse =
   | { ok: true; text: string; provider: ProviderName; model: string; fallbackUsed: boolean }
   | { ok: false; error: string; providersAttempted: ProviderId[] }
 
+export type ApiMode = 'automatic' | 'custom'
+
 export type ProviderStatus = {
   provider: ProviderId
   configured: boolean
+  isCustom?: boolean
+  mode?: ApiMode
   lastStatus: 'ok' | 'error' | 'rate-limited' | 'not-tested'
   message?: string
 }
@@ -33,6 +37,8 @@ export type OperationResult = { success: boolean; message: string }
 
 export interface VibeWriteBridge {
   getProviderStatus(): Promise<ProviderStatus[]>
+  getApiMode(): Promise<ApiMode>
+  setApiMode(mode: ApiMode): Promise<{ success: boolean; mode: ApiMode }>
   generateRewrite(request: RewriteRequest): Promise<RewriteResponse>
   generateOfflineRewrite(request: RewriteRequest): Promise<RewriteResponse>
   setApiKey(input: { provider: ProviderId; key: string }): Promise<OperationResult>

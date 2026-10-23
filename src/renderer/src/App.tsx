@@ -7,6 +7,7 @@ import type {
   RewriteResponse
 } from './types/vibewrite-api'
 import { BackgroundDoodles } from './components/BackgroundDoodles'
+import { TitleBar } from './components/TitleBar'
 import { LaptopIllustration } from './components/LaptopIllustration'
 import { TextInput } from './components/TextInput'
 import { VibathonHeading } from './components/VibathonHeading'
@@ -252,24 +253,12 @@ export function App(): React.JSX.Element {
       {/* Decorative Background Ink Doodles in Corners */}
       <BackgroundDoodles />
 
-      {/* Discreet Navigation / Secret Bar */}
-      <nav className="vibathon-nav-bar" aria-label="Application toolbar">
-        <div className="brand-handwritten">
-          <span>✎ VibeWrite</span>
-        </div>
-
-        <div className="nav-actions">
-          <button
-            type="button"
-            className="sketch-pill-btn"
-            onClick={() => setIsSettingsOpen(true)}
-            id="open-settings-nav-btn"
-            title="Configure AI API keys"
-          >
-            ⚙ Settings {hasBridge && configuredCount > 0 ? `(${configuredCount} ready)` : ''}
-          </button>
-        </div>
-      </nav>
+      {/* Themed Notebook Title Bar with Logo & Actions */}
+      <TitleBar
+        configuredCount={configuredCount}
+        hasBridge={hasBridge}
+        onOpenSettings={() => setIsSettingsOpen(true)}
+      />
 
       {/* Status Toasts */}
       <StatusMessage toast={toast} onDismiss={() => setToast(null)} />

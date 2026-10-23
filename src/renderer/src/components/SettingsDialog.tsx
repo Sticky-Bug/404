@@ -88,7 +88,7 @@ export const SettingsDialog: React.FC<SettingsDialogProps> = ({
 
     try {
       if (!window.vibewrite) {
-        throw new Error('VibeWrite bridge is unavailable in this environment.')
+        throw new Error('VibeWrite bridge is unavailable in standalone mode.')
       }
 
       const res = await window.vibewrite.setApiKey({ provider, key })
@@ -216,140 +216,151 @@ export const SettingsDialog: React.FC<SettingsDialogProps> = ({
     {
       id: 'gemini',
       name: 'Google Gemini',
-      priority: 'Primary Provider (Priority 1)',
-      placeholder: 'Enter Gemini API Key...'
+      priority: 'Priority 1 (Primary Model)',
+      placeholder: 'Paste your Gemini API key...'
     },
     {
       id: 'groq',
-      name: 'Groq',
-      priority: 'High-speed Fallback (Priority 2)',
-      placeholder: 'Enter Groq API Key...'
+      name: 'Groq Cloud',
+      priority: 'Priority 2 (High-Speed Fallback)',
+      placeholder: 'Paste your Groq API key...'
     },
     {
       id: 'openrouter',
-      name: 'OpenRouter (Optional)',
-      priority: 'Tertiary Fallback (Priority 3)',
-      placeholder: 'Enter OpenRouter API Key...'
+      name: 'OpenRouter',
+      priority: 'Priority 3 (Optional Extended Fallback)',
+      placeholder: 'Paste your OpenRouter API key...'
     }
   ]
 
   return (
     <div
-      className="modal-backdrop"
+      className="sketch-modal-backdrop"
       role="dialog"
       aria-modal="true"
-      aria-labelledby="settings-dialog-title"
+      aria-labelledby="sketch-settings-title"
       onClick={onClose}
     >
-      <div className="modal-dialog" onClick={(e) => e.stopPropagation()}>
-        <div className="modal-header">
-          <h2 id="settings-dialog-title" className="modal-title">
-            AI Provider Settings
-          </h2>
+      <div className="sketch-modal-card" onClick={(e) => e.stopPropagation()}>
+        {/* Notebook Tape / Pin Decoration */}
+        <div className="modal-tape-decoration" aria-hidden="true">
+          <span>✎ SETTINGS NOTEBOOK</span>
+        </div>
+
+        <div className="sketch-modal-header">
+          <div className="modal-title-group">
+            <h2 id="sketch-settings-title" className="sketch-modal-title">
+              AI Provider Setup
+            </h2>
+            <p className="sketch-modal-subtitle">
+              Keys are encrypted with native safeStorage and never sent to cloud telemetry.
+            </p>
+          </div>
+
           <button
             type="button"
-            className="btn-ghost"
+            className="sketch-close-btn"
             onClick={onClose}
             aria-label="Close settings"
-            id="close-settings-x-btn"
+            id="close-sketch-settings-btn"
           >
             ✕
           </button>
         </div>
 
-        <div className="modal-body">
-          <p style={{ fontSize: '0.8125rem', color: 'var(--text-muted)' }}>
-            API keys are handled securely by Electron&apos;s native process and safeStorage. Keys
-            are never stored in localStorage, cookies, or renderer memory.
-          </p>
-
+        <div className="sketch-modal-body">
           {providerList.map((p) => {
             const status = statuses[p.id]
             const state = formState[p.id]
             const isConfigured = status?.configured
 
             return (
-              <section key={p.id} className="settings-provider-group">
-                <div className="settings-provider-header">
+              <section key={p.id} className="sketch-provider-box">
+                <div className="provider-box-header">
                   <div>
-                    <h3 className="settings-provider-title">{p.name}</h3>
-                    <span style={{ fontSize: '0.75rem', color: 'var(--text-tertiary)' }}>
-                      {p.priority}
-                    </span>
+                    <h3 className="provider-name">{p.name}</h3>
+                    <span className="provider-priority">{p.priority}</span>
                   </div>
-                  <span
-                    className="bridge-status-pill"
-                    style={{
-                      backgroundColor: isConfigured
-                        ? 'var(--status-ok-bg)'
-                        : 'var(--bg-surface-subtle)',
-                      color: isConfigured ? 'var(--status-ok-text)' : 'var(--text-tertiary)'
-                    }}
-                  >
-                    <span className={`status-dot ${isConfigured ? 'active' : ''}`} />
-                    {isConfigured ? 'Configured' : 'Not Set'}
+
+                  <span className={`provider-status-badge ${isConfigured ? 'configured' : ''}`}>
+                    <span className={`status-ink-dot ${isConfigured ? 'active' : ''}`} />
+                    {isConfigured ? 'Ready & Saved' : 'Not Configured'}
                   </span>
                 </div>
 
-                <div className="settings-key-input-row">
+                <div className="provider-input-row">
                   <input
                     type="password"
-                    className="input-text"
-                    placeholder={isConfigured ? '•••••••••••••••••••• (Key saved)' : p.placeholder}
+                    className="sketch-key-input"
+                    placeholder={
+                      isConfigured ? '•••••••••••••••••••• (Saved in safeStorage)' : p.placeholder
+                    }
                     value={state.keyInput}
                     onChange={(e) => handleKeyChange(p.id, e.target.value)}
                     disabled={state.isSaving || state.isTesting}
-                    id={`key-input-${p.id}`}
+                    id={`sketch-key-input-${p.id}`}
                     autoComplete="off"
                   />
-                  <button
-                    type="button"
-                    className="btn-secondary"
-                    onClick={() => handleSave(p.id)}
-                    disabled={!state.keyInput.trim() || state.isSaving}
-                    id={`save-key-btn-${p.id}`}
-                  >
-                    {state.isSaving ? 'Saving...' : 'Save'}
-                  </button>
-                  {isConfigured && (
+
+                  <div className="provider-actions-group">
                     <button
                       type="button"
-                      className="btn-secondary"
-                      onClick={() => handleClear(p.id)}
-                      disabled={state.isClearing}
-                      id={`clear-key-btn-${p.id}`}
-                      style={{ color: 'var(--status-err-text)' }}
+                      className="sketch-btn-pill primary"
+                      onClick={() => handleSave(p.id)}
+                      disabled={!state.keyInput.trim() || state.isSaving}
+                      id={`save-btn-${p.id}`}
                     >
-                      {state.isClearing ? 'Clearing...' : 'Clear'}
+                      {state.isSaving ? 'Saving...' : 'Save Key'}
                     </button>
-                  )}
-                  {isConfigured && (
-                    <button
-                      type="button"
-                      className="btn-secondary"
-                      onClick={() => handleTest(p.id)}
-                      disabled={state.isTesting}
-                      id={`test-key-btn-${p.id}`}
-                    >
-                      {state.isTesting ? 'Testing...' : 'Test'}
-                    </button>
-                  )}
+
+                    {isConfigured && (
+                      <button
+                        type="button"
+                        className="sketch-btn-pill"
+                        onClick={() => handleTest(p.id)}
+                        disabled={state.isTesting}
+                        id={`test-btn-${p.id}`}
+                      >
+                        {state.isTesting ? 'Testing...' : 'Test'}
+                      </button>
+                    )}
+
+                    {isConfigured && (
+                      <button
+                        type="button"
+                        className="sketch-btn-pill danger"
+                        onClick={() => handleClear(p.id)}
+                        disabled={state.isClearing}
+                        id={`clear-btn-${p.id}`}
+                      >
+                        {state.isClearing ? 'Clearing...' : 'Clear'}
+                      </button>
+                    )}
+                  </div>
                 </div>
 
                 {state.message && (
-                  <p
-                    className={`settings-status-note ${state.statusType === 'ok' ? 'ok' : 'error'}`}
+                  <div
+                    className={`sketch-status-feedback ${
+                      state.statusType === 'ok' ? 'ok' : 'error'
+                    }`}
                   >
-                    {state.message}
-                  </p>
+                    <span>{state.statusType === 'ok' ? '✓' : '⚠'}</span>
+                    <span>{state.message}</span>
+                  </div>
                 )}
               </section>
             )
           })}
         </div>
 
-        <div className="modal-footer">
-          <button type="button" className="btn-secondary" onClick={onClose} id="close-settings-btn">
+        <div className="sketch-modal-footer">
+          <button
+            type="button"
+            className="sketch-btn-pill done"
+            onClick={onClose}
+            id="done-sketch-settings-btn"
+          >
             Done
           </button>
         </div>

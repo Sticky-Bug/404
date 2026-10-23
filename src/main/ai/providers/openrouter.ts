@@ -95,9 +95,10 @@ export async function callOpenRouter(
   draft: string,
   personaId: PersonaId,
   intensity: ToneIntensity,
-  customInstruction?: string
+  customInstruction?: string,
+  language = 'auto'
 ): Promise<{ text: string; model: string }> {
-  const systemInstruction = buildSystemPrompt(personaId, intensity, customInstruction)
+  const systemInstruction = buildSystemPrompt(personaId, intensity, customInstruction, language)
   const primaryModel = OPENROUTER_MODELS[0]
 
   try {

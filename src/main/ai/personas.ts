@@ -1,3 +1,5 @@
+import { buildLanguagePrompt } from './languages'
+
 export type PersonaId =
   | 'executive'
   | 'supportive'
@@ -13,7 +15,8 @@ export type ToneIntensity = 'subtle' | 'balanced' | 'bold'
 export function buildSystemPrompt(
   personaId: PersonaId,
   intensity: ToneIntensity,
-  customInstruction?: string
+  customInstruction?: string,
+  languageCode = 'auto'
 ): string {
   const intensityGuide = {
     subtle: 'Apply light stylistic polish while keeping original phrasing as close as possible.',
@@ -40,8 +43,10 @@ export function buildSystemPrompt(
     custom: `Custom tone instruction: ${customInstruction || 'Clean, engaging rewrite'}.`
   }
 
+  const languageGuide = buildLanguagePrompt(languageCode)
+
   return `You are VibeWrite, an expert desktop writing assistant.
-Transform the provided user draft into the requested target persona.
+Transform the provided user draft into the requested target persona and language.
 
 PERSONA GUIDELINES:
 ${personaGuides[personaId]}
@@ -49,10 +54,12 @@ ${personaGuides[personaId]}
 INTENSITY LEVEL:
 ${intensityGuide}
 
+${languageGuide}
+
 CRITICAL REWRITE RULES:
 1. Preserve all factual claims, names, numbers, dates, deadlines, commitments, and core intent.
 2. Do NOT invent new facts, promises, or dates.
 3. Return ONLY the rewritten message text directly.
-4. Do NOT include any preamble, commentary, greetings like "Here is your rewrite:", or conversational filler.
+4. Do NOT include any preamble, commentary, translation notes, greetings like "Here is your rewrite:", or conversational filler.
 5. If the draft contains subject lines or bullet points, preserve the organizational structure.`
 }

@@ -16,6 +16,7 @@ export type RewriteRequest = {
   personaId: PersonaId
   intensity: ToneIntensity
   customInstruction?: string
+  language?: string
 }
 
 export type RewriteResponse =

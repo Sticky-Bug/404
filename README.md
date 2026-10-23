@@ -11,7 +11,14 @@ An offline-first, notebook-themed Electron desktop application built with React,
    - Dynamic 3-tier cascade fallback: Google Gemini (`gemini-3-flash-preview`), Groq Cloud (`openai/gpt-oss-120b`, `openai/gpt-oss-20b`, `qwen/qwen3.8-27b`), OpenRouter, plus an offline rule-based heuristic transformer.
    - Encrypted API key persistence using OS-level `safeStorage`.
 
-2. **Gmail Integration & Direct Delivery**:
+2. **Bilingual & Multilingual Generation**:
+   - **Auto-Detection Mode**: Accurately recognizes the source language (Spanish, Russian, Hindi, French, etc.) and writes the persona rewrite in that same language without forcing English.
+   - **Target Output Language**: Directly translate and rewrite into 21+ supported languages including Russian, Hindi, Spanish, French, German, Japanese, Korean, Arabic, and Chinese.
+   - **Decoupled Persona & Language**: Independently choose persona (CEO, Legal, Friendly, etc.) and language simultaneously.
+   - **Honest Offline Guard**: Gracefully warns if offline fallback is used with unsupported foreign translations.
+   - **Accessible UI**: Searchable dropdown beside "Convert to Persona" with full keyboard navigation.
+
+3. **Gmail Integration & Direct Delivery**:
    - **Participant Management**: Dynamic `To`, `Cc`, and `Bcc` recipient table with inline RFC email validation.
    - **RFC 2822 Compliant MIME Builder**: Proper UTF-8 subject/body encoding, date stamp, message IDs, and hidden Bcc recipient protection.
    - **Google OAuth 2.0 PKCE Flow**: Secure desktop loopback listener on `http://localhost:32111/oauth2callback` requesting `gmail.send` and `gmail.compose` scopes with automatic token refresh.

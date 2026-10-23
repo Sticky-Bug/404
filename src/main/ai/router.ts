@@ -14,7 +14,8 @@ export async function executeRewrite(
   draft: string,
   personaId: PersonaId,
   intensity: ToneIntensity,
-  customInstruction?: string
+  customInstruction?: string,
+  language = 'auto'
 ): Promise<RewriteResult> {
   const providerOrder: ProviderId[] = ['gemini', 'groq', 'openrouter']
   const attempted: ProviderId[] = []
@@ -34,11 +35,11 @@ export async function executeRewrite(
       let res: { text: string; model: string }
 
       if (provider === 'gemini') {
-        res = await callGemini(key, draft, personaId, intensity, customInstruction)
+        res = await callGemini(key, draft, personaId, intensity, customInstruction, language)
       } else if (provider === 'groq') {
-        res = await callGroq(key, draft, personaId, intensity, customInstruction)
+        res = await callGroq(key, draft, personaId, intensity, customInstruction, language)
       } else {
-        res = await callOpenRouter(key, draft, personaId, intensity, customInstruction)
+        res = await callOpenRouter(key, draft, personaId, intensity, customInstruction, language)
       }
 
       keyStore.updateStatus(provider, 'ok', 'Last call succeeded')

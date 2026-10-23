@@ -1,14 +1,19 @@
 import { buildSystemPrompt, type PersonaId, type ToneIntensity } from '../personas'
 
-export async function callOpenRouter(
+const OPENROUTER_MODELS = [
+  'meta-llama/llama-3.2-3b-instruct:free',
+  'google/gemini-2.0-flash-exp:free',
+  'mistralai/mistral-7b-instruct:free',
+  'openrouter/auto'
+]
+
+async function executeOpenRouterRequest(
   apiKey: string,
-  draft: string,
-  personaId: PersonaId,
-  intensity: ToneIntensity,
-  customInstruction?: string
+  modelName: string,
+  systemInstruction: string,
+  draft: string
 ): Promise<{ text: string; model: string }> {
-  const model = 'meta-llama/llama-3.2-3b-instruct:free'
-  const systemInstruction = buildSystemPrompt(personaId, intensity, customInstruction)
+  const cleanKey = apiKey.trim().replace(/^["']|["']$/g, '')
   const endpoint = 'https://openrouter.ai/api/v1/chat/completions'
 
   const controller = new AbortController()
@@ -19,13 +24,13 @@ export async function callOpenRouter(
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        Authorization: `Bearer ${apiKey.trim()}`,
+        Authorization: `Bearer ${cleanKey}`,
         'HTTP-Referer': 'https://vibewrite.app',
         'X-Title': 'VibeWrite'
       },
       signal: controller.signal,
       body: JSON.stringify({
-        model,
+        model: modelName,
         messages: [
           { role: 'system', content: systemInstruction },
           { role: 'user', content: `Original Draft:\n"""\n${draft}\n"""` }
@@ -47,7 +52,16 @@ export async function callOpenRouter(
       } catch {
         parsedMsg = errText.slice(0, 150)
       }
-      throw new Error(`OpenRouter error (${res.status}): ${parsedMsg}`)
+
+      if (res.status === 401) {
+        throw new Error(
+          `OpenRouter authentication error (401): "${parsedMsg}". Please verify your key at openrouter.ai/keys (should start with sk-or-v1-).`
+        )
+      }
+
+      const err = new Error(`OpenRouter error (${res.status}): ${parsedMsg}`)
+      ;(err as { status?: number }).status = res.status
+      throw err
     }
 
     const data = (await res.json()) as {
@@ -65,12 +79,39 @@ export async function callOpenRouter(
 
     return {
       text: content.trim(),
-      model
+      model: modelName
     }
   } catch (err: unknown) {
     clearTimeout(timeout)
     if (err instanceof Error && err.name === 'AbortError') {
       throw new Error('OpenRouter request timed out after 20 seconds.', { cause: err })
+    }
+    throw err
+  }
+}
+
+export async function callOpenRouter(
+  apiKey: string,
+  draft: string,
+  personaId: PersonaId,
+  intensity: ToneIntensity,
+  customInstruction?: string
+): Promise<{ text: string; model: string }> {
+  const systemInstruction = buildSystemPrompt(personaId, intensity, customInstruction)
+  const primaryModel = OPENROUTER_MODELS[0]
+
+  try {
+    return await executeOpenRouterRequest(apiKey, primaryModel, systemInstruction, draft)
+  } catch (err: unknown) {
+    const status = (err as { status?: number })?.status
+    if (status === 404) {
+      for (let i = 1; i < OPENROUTER_MODELS.length; i++) {
+        try {
+          return await executeOpenRouterRequest(apiKey, OPENROUTER_MODELS[i], systemInstruction, draft)
+        } catch {
+          // try next model
+        }
+      }
     }
     throw err
   }
@@ -82,7 +123,7 @@ export async function testOpenRouter(
   try {
     const res = await callOpenRouter(apiKey, 'Hello, testing connection.', 'executive', 'subtle')
     if (res.text) {
-      return { success: true, message: 'OpenRouter connected successfully.' }
+      return { success: true, message: `OpenRouter connected successfully (${res.model}).` }
     }
     return { success: false, message: 'No output received from OpenRouter test.' }
   } catch (err: unknown) {

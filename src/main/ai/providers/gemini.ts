@@ -1,16 +1,63 @@
 import { buildSystemPrompt, type PersonaId, type ToneIntensity } from '../personas'
 
-export async function callGemini(
+let cachedGeminiModel: string | null = null
+
+const GEMINI_CANDIDATES = [
+  'gemini-2.5-flash',
+  'gemini-2.0-flash',
+  'gemini-2.0-flash-exp',
+  'gemini-1.5-flash-latest',
+  'gemini-1.5-flash',
+  'gemini-1.5-flash-8b',
+  'gemini-1.5-pro',
+  'gemini-pro'
+]
+
+async function discoverGeminiModel(apiKey: string): Promise<string> {
+  if (cachedGeminiModel) return cachedGeminiModel
+
+  try {
+    const listEndpoint = `https://generativelanguage.googleapis.com/v1beta/models?key=${encodeURIComponent(
+      apiKey.trim()
+    )}`
+    const res = await fetch(listEndpoint, { method: 'GET' })
+    if (res.ok) {
+      const data = (await res.json()) as {
+        models?: Array<{ name: string; supportedGenerationMethods?: string[] }>
+      }
+      const available =
+        data.models
+          ?.filter((m) => m.supportedGenerationMethods?.includes('generateContent'))
+          ?.map((m) => m.name.replace(/^models\//, '')) || []
+
+      for (const pref of GEMINI_CANDIDATES) {
+        if (available.includes(pref)) {
+          cachedGeminiModel = pref
+          return pref
+        }
+      }
+
+      if (available.length > 0) {
+        cachedGeminiModel = available[0]
+        return available[0]
+      }
+    }
+  } catch {
+    // ignore list error and fallback to default candidate
+  }
+
+  return 'gemini-2.0-flash'
+}
+
+async function executeGeminiRequest(
   apiKey: string,
-  draft: string,
-  personaId: PersonaId,
-  intensity: ToneIntensity,
-  customInstruction?: string
+  modelName: string,
+  systemInstruction: string,
+  draft: string
 ): Promise<{ text: string; model: string }> {
-  const model = 'gemini-1.5-flash'
-  const systemInstruction = buildSystemPrompt(personaId, intensity, customInstruction)
-  const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${encodeURIComponent(
-    apiKey
+  const cleanKey = apiKey.trim().replace(/^["']|["']$/g, '')
+  const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${encodeURIComponent(
+    cleanKey
   )}`
 
   const controller = new AbortController()
@@ -53,7 +100,9 @@ export async function callGemini(
       } catch {
         parsedMsg = errText.slice(0, 150)
       }
-      throw new Error(`Gemini error (${res.status}): ${parsedMsg}`)
+      const err = new Error(`Gemini error (${res.status}): ${parsedMsg}`)
+      ;(err as { status?: number }).status = res.status
+      throw err
     }
 
     const data = (await res.json()) as {
@@ -71,7 +120,7 @@ export async function callGemini(
 
     return {
       text: candidate.trim(),
-      model
+      model: modelName
     }
   } catch (err: unknown) {
     clearTimeout(timeout)
@@ -82,11 +131,43 @@ export async function callGemini(
   }
 }
 
+export async function callGemini(
+  apiKey: string,
+  draft: string,
+  personaId: PersonaId,
+  intensity: ToneIntensity,
+  customInstruction?: string
+): Promise<{ text: string; model: string }> {
+  const systemInstruction = buildSystemPrompt(personaId, intensity, customInstruction)
+  const primaryModel = await discoverGeminiModel(apiKey)
+
+  try {
+    return await executeGeminiRequest(apiKey, primaryModel, systemInstruction, draft)
+  } catch (err: unknown) {
+    // If model not found (404), iterate through other candidates
+    const status = (err as { status?: number })?.status
+    if (status === 404) {
+      for (const fallbackModel of GEMINI_CANDIDATES) {
+        if (fallbackModel === primaryModel) continue
+        try {
+          const res = await executeGeminiRequest(apiKey, fallbackModel, systemInstruction, draft)
+          cachedGeminiModel = fallbackModel
+          return res
+        } catch {
+          // continue to next candidate
+        }
+      }
+    }
+    throw err
+  }
+}
+
 export async function testGemini(apiKey: string): Promise<{ success: boolean; message: string }> {
   try {
+    cachedGeminiModel = null // force redetection on test
     const res = await callGemini(apiKey, 'Hello, testing connection.', 'executive', 'subtle')
     if (res.text) {
-      return { success: true, message: 'Google Gemini connected successfully.' }
+      return { success: true, message: `Google Gemini connected successfully (${res.model}).` }
     }
     return { success: false, message: 'No output received from Gemini test.' }
   } catch (err: unknown) {

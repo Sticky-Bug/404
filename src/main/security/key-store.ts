@@ -45,7 +45,7 @@ class KeyStore {
   }
 
   public setKey(provider: ProviderId, key: string): { success: boolean; message: string } {
-    const trimmed = key.trim()
+    const trimmed = key.trim().replace(/^["']|["']$/g, '').trim()
     if (!trimmed) {
       return { success: false, message: 'Key cannot be empty.' }
     }

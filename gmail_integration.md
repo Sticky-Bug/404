@@ -35,37 +35,37 @@ Generating a draft must never send an email.
 
 ### Gmail account connection
 
--   Show account status: `Not connected`, `Connecting…`,
-    `Connected as name@gmail.com`, or `Connection expired`.
--   Provide a `Connect Gmail` button.
--   Provide `Disconnect` and `Reconnect` actions when appropriate.
--   Show the account currently selected as the sender before sending.
--   Never ask users to paste their Google password into VibeWrite.
--   If Gmail is not connected, allow local drafting and copying; disable
-    sending with an explanation.
+- Show account status: `Not connected`, `Connecting…`,
+  `Connected as name@gmail.com`, or `Connection expired`.
+- Provide a `Connect Gmail` button.
+- Provide `Disconnect` and `Reconnect` actions when appropriate.
+- Show the account currently selected as the sender before sending.
+- Never ask users to paste their Google password into VibeWrite.
+- If Gmail is not connected, allow local drafting and copying; disable
+  sending with an explanation.
 
 ### Keep generation and sending separate
 
 The existing tone-generation controls remain in the current editor area,
 for example:
 
--   `Generate tone drafts`
--   `Regenerate`
--   `Compare versions`
+- `Generate tone drafts`
+- `Regenerate`
+- `Compare versions`
 
 Below the main editor/result area, add a visually separate section
 titled **Email participants & delivery** containing:
 
--   Sender account selector/status.
--   Recipient rows with email address and recipient type (`To`, `Cc`,
-    `Bcc`).
--   `Add participant` and remove-recipient controls.
--   Subject input.
--   Final email body preview/editor populated from the selected tone
-    draft.
--   `Send email` button.
--   Optional `Save as Gmail draft` button, if implemented.
--   Delivery status and error messages.
+- Sender account selector/status.
+- Recipient rows with email address and recipient type (`To`, `Cc`,
+  `Bcc`).
+- `Add participant` and remove-recipient controls.
+- Subject input.
+- Final email body preview/editor populated from the selected tone
+  draft.
+- `Send email` button.
+- Optional `Save as Gmail draft` button, if implemented.
+- Delivery status and error messages.
 
 **Do not** put `Send email` beside, inside, or in the same button group
 as `Generate tone drafts`. Do not send automatically after generation or
@@ -74,20 +74,20 @@ use a separate handler.
 
 ### Participant management
 
--   Support multiple recipients.
--   Validate email syntax on the client for helpful feedback, then
-    validate again in the main process.
--   Prevent sending if there are no valid `To` recipients. Cc/Bcc alone
-    should not count as the primary recipient unless the product
-    intentionally supports that behavior.
--   Deduplicate addresses case-insensitively, or warn users about
-    duplicates.
--   Preserve recipient type when adding/removing participants.
--   Display Bcc recipients only in the sender's confirmation UI; never
-    include Bcc addresses in visible To/Cc headers.
--   Do not infer or auto-add participants without the user's explicit
-    action.
--   Confirm the sender account and all recipients before sending.
+- Support multiple recipients.
+- Validate email syntax on the client for helpful feedback, then
+  validate again in the main process.
+- Prevent sending if there are no valid `To` recipients. Cc/Bcc alone
+  should not count as the primary recipient unless the product
+  intentionally supports that behavior.
+- Deduplicate addresses case-insensitively, or warn users about
+  duplicates.
+- Preserve recipient type when adding/removing participants.
+- Display Bcc recipients only in the sender's confirmation UI; never
+  include Bcc addresses in visible To/Cc headers.
+- Do not infer or auto-add participants without the user's explicit
+  action.
+- Confirm the sender account and all recipients before sending.
 
 ## 3. Recommended architecture
 
@@ -103,28 +103,28 @@ Responsibilities:
 
 ### Renderer (React + TypeScript)
 
--   Render connection status, participant rows, subject, message
-    preview, send confirmation, and result states.
--   Use the existing selected tone draft as a starting point, but allow
-    the user to review/edit the final body.
--   Call only typed methods exposed by the preload bridge.
--   Never import Google API credentials or OAuth libraries directly into
-    renderer components.
--   Never send an email from a React effect or from a draft-generation
-    callback.
+- Render connection status, participant rows, subject, message
+  preview, send confirmation, and result states.
+- Use the existing selected tone draft as a starting point, but allow
+  the user to review/edit the final body.
+- Call only typed methods exposed by the preload bridge.
+- Never import Google API credentials or OAuth libraries directly into
+  renderer components.
+- Never send an email from a React effect or from a draft-generation
+  callback.
 
 ### Preload
 
 Expose a small, typed API, such as:
 
-``` ts
+```ts
 interface GmailIntegrationAPI {
-  getStatus(): Promise<GmailAccountStatus>;
-  connect(): Promise<GmailAccountStatus>;
-  disconnect(): Promise<void>;
-  sendEmail(input: SendEmailInput): Promise<SendEmailResult>;
+  getStatus(): Promise<GmailAccountStatus>
+  connect(): Promise<GmailAccountStatus>
+  disconnect(): Promise<void>
+  sendEmail(input: SendEmailInput): Promise<SendEmailResult>
   // Optional:
-  saveDraft?(input: SendEmailInput): Promise<{ draftId: string }>;
+  saveDraft?(input: SendEmailInput): Promise<{ draftId: string }>
 }
 ```
 
@@ -135,23 +135,23 @@ arbitrary channel names to the renderer.
 
 ### Electron main process
 
--   Start OAuth using the supported Google OAuth flow for the actual
-    distribution model.
--   Open Google's consent/login page in the system browser when
-    appropriate; do not collect passwords in an embedded form.
--   Handle the OAuth callback securely and validate `state` to protect
-    against CSRF.
--   Exchange authorization codes only in the main process.
--   Keep tokens out of renderer state, logs, crash reports, and error
-    messages.
--   Store secrets/tokens using OS-backed secure storage where available
-    (Electron `safeStorage` can protect stored token material, but it is
-    not a replacement for correct OAuth design).
--   Validate recipient addresses, subject/body types, limits, and
-    account state before making API calls.
--   Construct and send the Gmail API request.
--   Return a minimal result (success and message/thread ID if useful),
-    never raw tokens.
+- Start OAuth using the supported Google OAuth flow for the actual
+  distribution model.
+- Open Google's consent/login page in the system browser when
+  appropriate; do not collect passwords in an embedded form.
+- Handle the OAuth callback securely and validate `state` to protect
+  against CSRF.
+- Exchange authorization codes only in the main process.
+- Keep tokens out of renderer state, logs, crash reports, and error
+  messages.
+- Store secrets/tokens using OS-backed secure storage where available
+  (Electron `safeStorage` can protect stored token material, but it is
+  not a replacement for correct OAuth design).
+- Validate recipient addresses, subject/body types, limits, and
+  account state before making API calls.
+- Construct and send the Gmail API request.
+- Return a minimal result (success and message/thread ID if useful),
+  never raw tokens.
 
 ## 4. Google Cloud and Gmail API setup
 
@@ -165,7 +165,7 @@ arbitrary channel names to the renderer.
     cannot safely keep a shared client secret confidential.
 5.  Add only the scopes the feature needs. For sending messages, prefer
     the narrow Gmail sending scope:
-    -   `https://www.googleapis.com/auth/gmail.send`
+    - `https://www.googleapis.com/auth/gmail.send`
 6.  If saving drafts is implemented, evaluate whether
     `https://www.googleapis.com/auth/gmail.compose` is needed. Request
     only scopes actually used.
@@ -199,12 +199,12 @@ Implementation outline for the main process:
 1.  Confirm the user is connected and has granted the sending scope.
 2.  Validate at least one `To` recipient, subject, and body.
 3.  Build a MIME message with correct headers:
-    -   `To`
-    -   `Cc` only when present
-    -   `Subject`
-    -   `MIME-Version: 1.0`
-    -   `Content-Type: text/plain; charset=UTF-8` (or a carefully
-        escaped multipart/HTML implementation if rich text is supported)
+    - `To`
+    - `Cc` only when present
+    - `Subject`
+    - `MIME-Version: 1.0`
+    - `Content-Type: text/plain; charset=UTF-8` (or a carefully
+      escaped multipart/HTML implementation if rich text is supported)
 4.  Put Bcc recipients in the MIME message's `Bcc` header for delivery,
     but never expose them in To/Cc display or recipient-visible copies.
 5.  Encode the complete MIME message as Base64URL (URL-safe Base64 with
@@ -221,11 +221,11 @@ version.
 
 Pseudo-code only:
 
-``` ts
+```ts
 async function sendEmail(input: SendEmailInput): Promise<SendEmailResult> {
-  const validated = validateSendInput(input);
-  const account = await requireConnectedGmailAccount();
-  await requireGrantedScope(account, "https://www.googleapis.com/auth/gmail.send");
+  const validated = validateSendInput(input)
+  const account = await requireConnectedGmailAccount()
+  await requireGrantedScope(account, 'https://www.googleapis.com/auth/gmail.send')
 
   // Build MIME message from validated recipients, subject, and body.
   // Base64URL-encode it and call Gmail users.messages.send.
@@ -239,36 +239,36 @@ project's actual setup.
 
 ## 6. Suggested TypeScript data types
 
-``` ts
-type RecipientType = "to" | "cc" | "bcc";
+```ts
+type RecipientType = 'to' | 'cc' | 'bcc'
 
 interface EmailParticipant {
-  id: string;
-  email: string;
-  type: RecipientType;
-  displayName?: string;
+  id: string
+  email: string
+  type: RecipientType
+  displayName?: string
 }
 
 interface GmailAccountStatus {
-  connected: boolean;
-  email?: string;
-  displayName?: string;
-  needsReconnect?: boolean;
+  connected: boolean
+  email?: string
+  displayName?: string
+  needsReconnect?: boolean
 }
 
 interface SendEmailInput {
-  to: string[];
-  cc?: string[];
-  bcc?: string[];
-  subject: string;
-  body: string;
+  to: string[]
+  cc?: string[]
+  bcc?: string[]
+  subject: string
+  body: string
 }
 
 interface SendEmailResult {
-  success: boolean;
-  messageId?: string;
-  errorCode?: string;
-  userMessage?: string;
+  success: boolean
+  messageId?: string
+  errorCode?: string
+  userMessage?: string
 }
 ```
 
@@ -279,20 +279,20 @@ renderer-supplied fields as untrusted input.
 
 Provide actionable messages for common cases:
 
--   Not connected: `Connect a Gmail account to send this email.`
--   Consent/scope missing:
-    `Reconnect Gmail and approve the requested sending permission.`
--   Expired/revoked credentials:
-    `Your Gmail connection expired. Reconnect to continue.`
--   Invalid recipient: `Check the highlighted email address.`
--   Offline/network error:
-    `Couldn't reach Gmail. Your message has not been confirmed as sent.`
--   Rate limit/quota:
-    `Gmail is temporarily limiting requests. Try again later.`
--   API rejected message: show a safe, human-readable explanation
-    without secrets.
--   Unknown outcome/network timeout:
-    `We couldn't confirm whether Gmail sent this message. Check your Sent folder before retrying.`
+- Not connected: `Connect a Gmail account to send this email.`
+- Consent/scope missing:
+  `Reconnect Gmail and approve the requested sending permission.`
+- Expired/revoked credentials:
+  `Your Gmail connection expired. Reconnect to continue.`
+- Invalid recipient: `Check the highlighted email address.`
+- Offline/network error:
+  `Couldn't reach Gmail. Your message has not been confirmed as sent.`
+- Rate limit/quota:
+  `Gmail is temporarily limiting requests. Try again later.`
+- API rejected message: show a safe, human-readable explanation
+  without secrets.
+- Unknown outcome/network timeout:
+  `We couldn't confirm whether Gmail sent this message. Check your Sent folder before retrying.`
 
 Do not automatically retry a send request after an ambiguous timeout;
 that could send duplicates. If retry is offered, tell the user to check
@@ -300,50 +300,50 @@ Sent first.
 
 ## 8. Security and privacy requirements
 
--   Never hard-code OAuth secrets, refresh tokens, or access tokens in
-    source code.
--   Never expose tokens to renderer JavaScript or store them in
-    `localStorage`.
--   Use least-privilege scopes.
--   Use OAuth `state` validation and the correct redirect flow.
--   Do not log email bodies, recipient lists, OAuth codes, or tokens.
--   Make sending a deliberate user action, preceded by a
-    review/confirmation step.
--   Do not send to hidden, automatically generated, or unreviewed
-    recipients.
--   Provide disconnect/revoke guidance and clear account identity.
--   Keep API keys and credentials out of Git; add local secret files to
-    `.gitignore`.
--   Explain that email content is sent to Google/Gmail and that draft
-    content may also be sent to the configured AI provider when users
-    request tone generation.
--   Consider a `mailto:`/copy-to-clipboard fallback if Gmail connection
-    setup cannot be completed during the hackathon.
+- Never hard-code OAuth secrets, refresh tokens, or access tokens in
+  source code.
+- Never expose tokens to renderer JavaScript or store them in
+  `localStorage`.
+- Use least-privilege scopes.
+- Use OAuth `state` validation and the correct redirect flow.
+- Do not log email bodies, recipient lists, OAuth codes, or tokens.
+- Make sending a deliberate user action, preceded by a
+  review/confirmation step.
+- Do not send to hidden, automatically generated, or unreviewed
+  recipients.
+- Provide disconnect/revoke guidance and clear account identity.
+- Keep API keys and credentials out of Git; add local secret files to
+  `.gitignore`.
+- Explain that email content is sent to Google/Gmail and that draft
+  content may also be sent to the configured AI provider when users
+  request tone generation.
+- Consider a `mailto:`/copy-to-clipboard fallback if Gmail connection
+  setup cannot be completed during the hackathon.
 
 ## 9. Acceptance criteria
 
--   [ ] User can connect a Google account through OAuth.
--   [ ] UI shows which Gmail account is connected.
--   [ ] User can disconnect and reconnect.
--   [ ] User can add, remove, and classify multiple To/Cc/Bcc
-    participants.
--   [ ] User can edit the subject and final email body.
--   [ ] The delivery panel appears below the existing main editor/window
-    content.
--   [ ] `Generate tone drafts` and `Send email` are separate controls
-    with separate handlers.
--   [ ] Generating or selecting a tone never sends an email.
--   [ ] Send requires an explicit click and confirmation.
--   [ ] The main process validates all send input and performs Gmail API
-    calls.
--   [ ] Tokens are not exposed to the renderer or committed to Git.
--   [ ] Success is displayed only after a successful API response.
--   [ ] Failures are visible and do not falsely claim the email was
-    sent.
--   [ ] Bcc recipients are not shown in recipient-visible To/Cc headers.
--   [ ] The app remains usable for drafting when Gmail is not connected.
--   [ ] Basic sending is tested with a development Gmail account before
-    the demo.
+- [ ] User can connect a Google account through OAuth.
+- [ ] UI shows which Gmail account is connected.
+- [ ] User can disconnect and reconnect.
+- [ ] User can add, remove, and classify multiple To/Cc/Bcc
+      participants.
+- [ ] User can edit the subject and final email body.
+- [ ] The delivery panel appears below the existing main editor/window
+      content.
+- [ ] `Generate tone drafts` and `Send email` are separate controls
+      with separate handlers.
+- [ ] Generating or selecting a tone never sends an email.
+- [ ] Send requires an explicit click and confirmation.
+- [ ] The main process validates all send input and performs Gmail API
+      calls.
+- [ ] Tokens are not exposed to the renderer or committed to Git.
+- [ ] Success is displayed only after a successful API response.
+- [ ] Failures are visible and do not falsely claim the email was
+      sent.
+- [ ] Bcc recipients are not shown in recipient-visible To/Cc headers.
+- [ ] The app remains usable for drafting when Gmail is not connected.
+- [ ] Basic sending is tested with a development Gmail account before
+      the demo.
 
 ## 10. Implementation order for the hackathon
 
@@ -367,7 +367,7 @@ the existing editor, review a final persona-adjusted email, and send it
 only through a separate, explicit **Send email** action. Draft
 generation and email delivery remain independent features.
 
-------------------------------------------------------------------------
+---
 
 ## 11. Git integration and handoff: commit the complete project to `main`
 
@@ -386,45 +386,45 @@ source code and all project files needed to install and run the app.
 
 ### Important collaboration rules
 
--   First inspect `git status`, the current branch, remotes, and recent
-    commits.
--   Preserve all existing frontend and backend work. Do not overwrite,
-    reset, or discard another contributor's changes.
--   If working on a feature branch, commit the feature there, then
-    integrate it into `main` using the team's agreed merge workflow.
--   Do not force-push `main` (`git push --force` / `--force-with-lease`
-    is not permitted for this task).
--   Do not commit directly to `main` if repository branch protection or
-    team policy requires a pull request.
--   If `main` has diverged, conflicts exist, credentials are missing,
-    tests fail, or permissions prevent pushing, stop and explain the
-    exact blocker. Do not pretend the push succeeded.
--   Only push when the user has authorized the requested repository
-    update and the remote/branch are verified. Never invent a remote URL
-    or change remotes without approval.
+- First inspect `git status`, the current branch, remotes, and recent
+  commits.
+- Preserve all existing frontend and backend work. Do not overwrite,
+  reset, or discard another contributor's changes.
+- If working on a feature branch, commit the feature there, then
+  integrate it into `main` using the team's agreed merge workflow.
+- Do not force-push `main` (`git push --force` / `--force-with-lease`
+  is not permitted for this task).
+- Do not commit directly to `main` if repository branch protection or
+  team policy requires a pull request.
+- If `main` has diverged, conflicts exist, credentials are missing,
+  tests fail, or permissions prevent pushing, stop and explain the
+  exact blocker. Do not pretend the push succeeded.
+- Only push when the user has authorized the requested repository
+  update and the remote/branch are verified. Never invent a remote URL
+  or change remotes without approval.
 
 ### Files that should be included
 
 Commit all required, non-secret project source and configuration,
 including as applicable:
 
--   Electron main-process source and IPC handlers.
--   Preload bridge source and TypeScript contracts.
--   React renderer/frontend source, components, styles, and assets.
--   Gmail OAuth and Gmail API integration source.
--   AI provider integration and local fallback source.
--   `package.json` and the correct package-manager lockfile
-    (`package-lock.json`, `pnpm-lock.yaml`, or `yarn.lock`).
--   Electron/Vite/TypeScript/build configuration.
--   Public assets and any required icons.
--   `.gitignore`.
--   `.env.example` containing placeholder variable names only, if
-    environment variables are used.
--   `README.md` with prerequisites, install/run/build commands, and
-    setup instructions.
--   This `gmail_integration.md` and other relevant project
-    documentation.
--   Tests and scripts needed to verify the application.
+- Electron main-process source and IPC handlers.
+- Preload bridge source and TypeScript contracts.
+- React renderer/frontend source, components, styles, and assets.
+- Gmail OAuth and Gmail API integration source.
+- AI provider integration and local fallback source.
+- `package.json` and the correct package-manager lockfile
+  (`package-lock.json`, `pnpm-lock.yaml`, or `yarn.lock`).
+- Electron/Vite/TypeScript/build configuration.
+- Public assets and any required icons.
+- `.gitignore`.
+- `.env.example` containing placeholder variable names only, if
+  environment variables are used.
+- `README.md` with prerequisites, install/run/build commands, and
+  setup instructions.
+- This `gmail_integration.md` and other relevant project
+  documentation.
+- Tests and scripts needed to verify the application.
 
 Do not add generated files unless the project explicitly requires them
 to run or package the app.
@@ -434,7 +434,7 @@ to run or package the app.
 Before staging, ensure `.gitignore` excludes at least the appropriate
 entries for this project's setup:
 
-``` gitignore
+```gitignore
 node_modules/
 dist/
 dist-electron/
@@ -458,19 +458,19 @@ it and follow the team's secret-removal procedure.
 
 ### Lockfile and reproducible installation
 
--   Commit the package manager's lockfile.
--   Ensure `package.json` declares every required runtime and
-    development dependency.
--   Do not rely on globally installed packages or a developer's local
-    `node_modules`.
--   After implementation, verify a clean dependency install from the
-    lockfile where feasible:
-    -   npm: `npm ci`
-    -   pnpm: `pnpm install --frozen-lockfile`
-    -   Yarn: use the appropriate immutable/frozen-lockfile command for
-        the project's Yarn version.
--   Use the package manager already established by the repository. Do
-    not create competing lockfiles.
+- Commit the package manager's lockfile.
+- Ensure `package.json` declares every required runtime and
+  development dependency.
+- Do not rely on globally installed packages or a developer's local
+  `node_modules`.
+- After implementation, verify a clean dependency install from the
+  lockfile where feasible:
+  - npm: `npm ci`
+  - pnpm: `pnpm install --frozen-lockfile`
+  - Yarn: use the appropriate immutable/frozen-lockfile command for
+    the project's Yarn version.
+- Use the package manager already established by the repository. Do
+  not create competing lockfiles.
 
 ### README handoff requirements
 
@@ -498,7 +498,7 @@ without asking the original developer for undocumented steps. Include:
 Run commands from the repository root, reviewing output after each step.
 Adapt commands to the actual branch and package manager.
 
-``` bash
+```bash
 git status
 git remote -v
 git branch --show-current
@@ -508,7 +508,7 @@ git log -5 --oneline
 Inspect and update `.gitignore`, `README.md`, package scripts, and the
 lockfile. Then review what will be staged:
 
-``` bash
+```bash
 git status --short
 git diff --check
 git diff
@@ -518,7 +518,7 @@ Stage the intended project files only. Avoid `git add .` if there may be
 credentials, build output, or unrelated files. Review the staged
 changes:
 
-``` bash
+```bash
 git add <reviewed-project-files>
 git diff --cached --check
 git diff --cached --stat
@@ -527,7 +527,7 @@ git diff --cached
 
 If checks pass, commit using a descriptive message, for example:
 
-``` bash
+```bash
 git commit -m "Integrate Gmail sending and complete app handoff"
 ```
 
@@ -536,7 +536,7 @@ for a feature branch, push the branch and open/merge a pull request if
 required. If authorized and the team explicitly permits direct pushes to
 `main`, verify the local `main` is up to date before pushing:
 
-``` bash
+```bash
 git fetch origin
 git switch main
 git pull --ff-only origin main
@@ -546,7 +546,7 @@ Integrate the feature branch using the team's agreed merge method,
 resolve conflicts without discarding either person's work, rerun checks,
 and then push:
 
-``` bash
+```bash
 git push origin main
 ```
 
@@ -558,7 +558,7 @@ conflicts.
 
 After pushing, verify the remote branch and commit:
 
-``` bash
+```bash
 git fetch origin
 git log -1 --oneline origin/main
 git status
@@ -573,13 +573,13 @@ was completed unless it was actually run.
 
 When finished, report:
 
--   Which branch and commit were pushed.
--   Whether the push to `origin/main` succeeded.
--   Which install, development, build, and test commands were run and
-    their outcomes.
--   Any required local setup that is not committed, such as OAuth
-    credentials or AI provider keys.
--   Any remaining blockers.
+- Which branch and commit were pushed.
+- Whether the push to `origin/main` succeeded.
+- Which install, development, build, and test commands were run and
+  their outcomes.
+- Any required local setup that is not committed, such as OAuth
+  credentials or AI provider keys.
+- Any remaining blockers.
 
 **Definition of done:** The shared repository contains the complete,
 integrated frontend and backend source and reproducible dependency

@@ -107,7 +107,12 @@ export async function callOpenRouter(
     if (status === 404) {
       for (let i = 1; i < OPENROUTER_MODELS.length; i++) {
         try {
-          return await executeOpenRouterRequest(apiKey, OPENROUTER_MODELS[i], systemInstruction, draft)
+          return await executeOpenRouterRequest(
+            apiKey,
+            OPENROUTER_MODELS[i],
+            systemInstruction,
+            draft
+          )
         } catch {
           // try next model
         }

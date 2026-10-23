@@ -7,7 +7,7 @@ An offline-first, notebook-themed Electron desktop application built with React,
 ## 🌟 Key Features
 
 1. **Multi-Model Persona Rewriting**:
-   - 8 distinct expressive tones: *CEO / Executive*, *Gen-Z*, *Legal Eagle*, *Corporate Professional*, *Warm & Friendly*, *Playful Roast*, *Poetic Romance*, and *Motivational Coach*.
+   - 8 distinct expressive tones: _CEO / Executive_, _Gen-Z_, _Legal Eagle_, _Corporate Professional_, _Warm & Friendly_, _Playful Roast_, _Poetic Romance_, and _Motivational Coach_.
    - Dynamic 3-tier cascade fallback: Google Gemini (`gemini-3-flash-preview`), Groq Cloud (`openai/gpt-oss-120b`, `openai/gpt-oss-20b`, `qwen/qwen3.8-27b`), OpenRouter, plus an offline rule-based heuristic transformer.
    - Encrypted API key persistence using OS-level `safeStorage`.
 
@@ -66,9 +66,8 @@ npm run build:linux # Linux (AppImage)
 1. **Connecting via Google Cloud OAuth**:
    - Create a project in Google Cloud Console.
    - Enable the **Gmail API**.
-   - Create an **OAuth 2.0 Client ID** for *Desktop App*.
+   - Create an **OAuth 2.0 Client ID** for _Desktop App_.
    - Add `http://localhost:32111/oauth2callback` as an authorized redirect URI.
    - Enter your Client ID and Client Secret in the VibeWrite Delivery Panel and click **Connect Gmail Account**.
 2. **Instant Demo Mode**:
    - Click **Quick 1-Click Connect Demo Account** to test the complete recipient management, RFC MIME generation, and dispatch UI flow without third-party Google Cloud setup.
-

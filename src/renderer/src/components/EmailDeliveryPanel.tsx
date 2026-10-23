@@ -89,14 +89,8 @@ export const EmailDeliveryPanel: React.FC<EmailDeliveryPanelProps> = ({
     setParticipants((prev) => prev.filter((p) => p.id !== id))
   }
 
-  const handleParticipantChange = (
-    id: string,
-    field: 'email' | 'type',
-    value: string
-  ): void => {
-    setParticipants((prev) =>
-      prev.map((p) => (p.id === id ? { ...p, [field]: value } : p))
-    )
+  const handleParticipantChange = (id: string, field: 'email' | 'type', value: string): void => {
+    setParticipants((prev) => prev.map((p) => (p.id === id ? { ...p, [field]: value } : p)))
   }
 
   const handleConnect = async (): Promise<void> => {
@@ -107,10 +101,9 @@ export const EmailDeliveryPanel: React.FC<EmailDeliveryPanelProps> = ({
 
     setIsConnecting(true)
     try {
-      const credentials =
-        oauthClientId.trim()
-          ? { clientId: oauthClientId.trim(), clientSecret: oauthClientSecret.trim() }
-          : undefined
+      const credentials = oauthClientId.trim()
+        ? { clientId: oauthClientId.trim(), clientSecret: oauthClientSecret.trim() }
+        : undefined
 
       const status = await window.vibewrite.gmailConnect(credentials)
       setAccountStatus(status)
@@ -205,9 +198,15 @@ export const EmailDeliveryPanel: React.FC<EmailDeliveryPanelProps> = ({
     setIsSending(true)
     setSendResult(null)
 
-    const to = participants.filter((p) => p.type === 'to' && p.email.trim()).map((p) => p.email.trim())
-    const cc = participants.filter((p) => p.type === 'cc' && p.email.trim()).map((p) => p.email.trim())
-    const bcc = participants.filter((p) => p.type === 'bcc' && p.email.trim()).map((p) => p.email.trim())
+    const to = participants
+      .filter((p) => p.type === 'to' && p.email.trim())
+      .map((p) => p.email.trim())
+    const cc = participants
+      .filter((p) => p.type === 'cc' && p.email.trim())
+      .map((p) => p.email.trim())
+    const bcc = participants
+      .filter((p) => p.type === 'bcc' && p.email.trim())
+      .map((p) => p.email.trim())
 
     try {
       if (!window.vibewrite?.gmailSendEmail) {
@@ -244,9 +243,15 @@ export const EmailDeliveryPanel: React.FC<EmailDeliveryPanelProps> = ({
     }
 
     setIsSavingDraft(true)
-    const to = participants.filter((p) => p.type === 'to' && p.email.trim()).map((p) => p.email.trim())
-    const cc = participants.filter((p) => p.type === 'cc' && p.email.trim()).map((p) => p.email.trim())
-    const bcc = participants.filter((p) => p.type === 'bcc' && p.email.trim()).map((p) => p.email.trim())
+    const to = participants
+      .filter((p) => p.type === 'to' && p.email.trim())
+      .map((p) => p.email.trim())
+    const cc = participants
+      .filter((p) => p.type === 'cc' && p.email.trim())
+      .map((p) => p.email.trim())
+    const bcc = participants
+      .filter((p) => p.type === 'bcc' && p.email.trim())
+      .map((p) => p.email.trim())
 
     try {
       if (!window.vibewrite?.gmailSaveDraft) {
@@ -278,7 +283,9 @@ export const EmailDeliveryPanel: React.FC<EmailDeliveryPanelProps> = ({
 
   // Fallback Copy to Clipboard
   const handleCopyEmail = async (): Promise<void> => {
-    const to = participants.filter((p) => p.type === 'to' && p.email.trim()).map((p) => p.email.trim())
+    const to = participants
+      .filter((p) => p.type === 'to' && p.email.trim())
+      .map((p) => p.email.trim())
     const formatted = `To: ${to.join(', ')}\nSubject: ${subject}\n\n${body}`
     try {
       await navigator.clipboard.writeText(formatted)
@@ -290,9 +297,18 @@ export const EmailDeliveryPanel: React.FC<EmailDeliveryPanelProps> = ({
 
   // Fallback mailto: link
   const handleOpenMailto = (): void => {
-    const to = participants.filter((p) => p.type === 'to' && p.email.trim()).map((p) => p.email.trim()).join(',')
-    const cc = participants.filter((p) => p.type === 'cc' && p.email.trim()).map((p) => p.email.trim()).join(',')
-    const bcc = participants.filter((p) => p.type === 'bcc' && p.email.trim()).map((p) => p.email.trim()).join(',')
+    const to = participants
+      .filter((p) => p.type === 'to' && p.email.trim())
+      .map((p) => p.email.trim())
+      .join(',')
+    const cc = participants
+      .filter((p) => p.type === 'cc' && p.email.trim())
+      .map((p) => p.email.trim())
+      .join(',')
+    const bcc = participants
+      .filter((p) => p.type === 'bcc' && p.email.trim())
+      .map((p) => p.email.trim())
+      .join(',')
 
     const params = new URLSearchParams()
     if (cc) params.set('cc', cc)
@@ -371,8 +387,9 @@ export const EmailDeliveryPanel: React.FC<EmailDeliveryPanelProps> = ({
             <div className="delivery-banner-text">
               <p>
                 <strong>Gmail direct sending is currently inactive.</strong> You can connect your
-                Google account above, or use the <em>Copy to Clipboard</em> / <em>Open in Mail App</em>{' '}
-                fallback buttons below to send through your default email client.
+                Google account above, or use the <em>Copy to Clipboard</em> /{' '}
+                <em>Open in Mail App</em> fallback buttons below to send through your default email
+                client.
               </p>
             </div>
           </div>
@@ -557,9 +574,7 @@ export const EmailDeliveryPanel: React.FC<EmailDeliveryPanelProps> = ({
             <span className="result-icon">{sendResult.success ? '✓' : '⚠'}</span>
             <div className="result-text">
               <p>
-                <strong>
-                  {sendResult.success ? 'Delivery Confirmed:' : 'Delivery Failed:'}
-                </strong>{' '}
+                <strong>{sendResult.success ? 'Delivery Confirmed:' : 'Delivery Failed:'}</strong>{' '}
                 {sendResult.userMessage}
               </p>
               {sendResult.messageId && (
@@ -578,7 +593,10 @@ export const EmailDeliveryPanel: React.FC<EmailDeliveryPanelProps> = ({
           aria-modal="true"
           aria-labelledby="confirm-modal-title"
         >
-          <div className="sketch-modal-card confirm-modal-card" onClick={(e) => e.stopPropagation()}>
+          <div
+            className="sketch-modal-card confirm-modal-card"
+            onClick={(e) => e.stopPropagation()}
+          >
             <div className="modal-tape-decoration">
               <span>CONFIRM EMAIL TRANSMISSION</span>
             </div>

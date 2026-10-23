@@ -23,9 +23,27 @@ export const SettingsDialog: React.FC<SettingsDialogProps> = ({
 }) => {
   const [activeTab, setActiveTab] = useState<ApiMode>('automatic')
   const [statuses, setStatuses] = useState<Record<ProviderId, ProviderStatus>>({
-    gemini: { provider: 'gemini', configured: true, isCustom: false, mode: 'automatic', lastStatus: 'not-tested' },
-    groq: { provider: 'groq', configured: true, isCustom: false, mode: 'automatic', lastStatus: 'not-tested' },
-    openrouter: { provider: 'openrouter', configured: true, isCustom: false, mode: 'automatic', lastStatus: 'not-tested' }
+    gemini: {
+      provider: 'gemini',
+      configured: true,
+      isCustom: false,
+      mode: 'automatic',
+      lastStatus: 'not-tested'
+    },
+    groq: {
+      provider: 'groq',
+      configured: true,
+      isCustom: false,
+      mode: 'automatic',
+      lastStatus: 'not-tested'
+    },
+    openrouter: {
+      provider: 'openrouter',
+      configured: true,
+      isCustom: false,
+      mode: 'automatic',
+      lastStatus: 'not-tested'
+    }
   })
 
   const [formState, setFormState] = useState<Record<ProviderId, ProviderConfigState>>({
@@ -352,8 +370,9 @@ export const SettingsDialog: React.FC<SettingsDialogProps> = ({
                 <div className="auto-banner-content">
                   <h4>Managed AI is Active</h4>
                   <p>
-                    You don&apos;t need to supply any API keys! VibeWrite automatically routes requests through
-                    our pre-configured Google Gemini, Groq, and OpenRouter pipelines with offline fallback.
+                    You don&apos;t need to supply any API keys! VibeWrite automatically routes
+                    requests through our pre-configured Google Gemini, Groq, and OpenRouter
+                    pipelines with offline fallback.
                   </p>
                 </div>
               </div>
@@ -378,7 +397,13 @@ export const SettingsDialog: React.FC<SettingsDialogProps> = ({
                       </span>
                     </div>
 
-                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                    <div
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'space-between'
+                      }}
+                    >
                       <span className="auto-provider-model">{p.desc}</span>
                       <button
                         type="button"
@@ -420,8 +445,16 @@ export const SettingsDialog: React.FC<SettingsDialogProps> = ({
             /* --- CUSTOM MODE PAGE (Option for setting custom API keys) --- */
             <>
               <div style={{ padding: '0 4px', marginBottom: '4px' }}>
-                <p style={{ margin: 0, fontSize: '0.9rem', color: 'var(--ink-light)', fontFamily: 'var(--font-hand)' }}>
-                  Provide your own keys below to override the automatic pipeline and use your own rate limits.
+                <p
+                  style={{
+                    margin: 0,
+                    fontSize: '0.9rem',
+                    color: 'var(--ink-light)',
+                    fontFamily: 'var(--font-hand)'
+                  }}
+                >
+                  Provide your own keys below to override the automatic pipeline and use your own
+                  rate limits.
                 </p>
               </div>
 
@@ -438,7 +471,9 @@ export const SettingsDialog: React.FC<SettingsDialogProps> = ({
                         <span className="provider-priority">{p.priority}</span>
                       </div>
 
-                      <span className={`provider-status-badge ${isCustomConfigured ? 'configured' : ''}`}>
+                      <span
+                        className={`provider-status-badge ${isCustomConfigured ? 'configured' : ''}`}
+                      >
                         <span className={`status-ink-dot ${isCustomConfigured ? 'active' : ''}`} />
                         {isCustomConfigured ? 'Custom Key Saved' : 'Not Configured'}
                       </span>

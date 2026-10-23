@@ -5,6 +5,7 @@
 Build a polished, responsive React landing page that closely matches the provided reference image.
 
 The page is a playful, hand-drawn text interaction interface with:
+
 - A warm, off-white paper background.
 - Hand-sketched black outlines and decorative doodles.
 - A large, rounded beige text input.
@@ -45,6 +46,7 @@ If the project already contains a component library, icon package, animation lib
 ### Design language
 
 The interface should resemble:
+
 - A hand-illustrated notebook page.
 - A whimsical editorial website.
 - A paper-based creative tool.
@@ -75,15 +77,15 @@ The sketch-like appearance should come from the illustration and detailing, not 
 
 Use the following approximate colors as a starting point. Adjust them slightly if needed to match the reference.
 
-| Element | Suggested color |
-|---|---|
-| Main page background | `#FAF9F4` |
-| Slight paper variation | `#F5F1E8` |
-| Main beige surfaces | `#E6D7BC` |
-| Warm beige highlights | `#D7C19E` |
-| Dark outlines | `#11100D` |
-| Primary text | `#11100D` |
-| Secondary ink details | `#39352B` |
+| Element                | Suggested color |
+| ---------------------- | --------------- |
+| Main page background   | `#FAF9F4`       |
+| Slight paper variation | `#F5F1E8`       |
+| Main beige surfaces    | `#E6D7BC`       |
+| Warm beige highlights  | `#D7C19E`       |
+| Dark outlines          | `#11100D`       |
+| Primary text           | `#11100D`       |
+| Secondary ink details  | `#39352B`       |
 
 ### Color rules
 
@@ -119,6 +121,7 @@ The main interactive elements occupy the central portion of the page, while the 
 For a viewport approximately 1466 × 828 pixels, use the supplied image as the proportional reference.
 
 Approximate positioning:
+
 - Laptop illustration: centered horizontally, around 13–42% of the viewport height.
 - Main input: approximately 63% of the viewport width, centered horizontally.
 - Main input height: around 110 pixels in the reference, scaled appropriately for CSS.
@@ -132,6 +135,7 @@ These are visual proportions, not rigid pixel requirements. The layout must adap
 ### Main content wrapper
 
 Use a centered main container with:
+
 - A sensible maximum width.
 - Fluid horizontal padding.
 - Vertical spacing that preserves the reference's proportions.
@@ -153,6 +157,7 @@ The background is not plain white. It resembles lightly textured warm paper.
 Use a subtle CSS texture or a small, locally available paper-texture asset.
 
 Possible techniques:
+
 - A nearly invisible repeating noise texture.
 - Extremely subtle off-white tonal variation.
 - A low-opacity paper grain overlay.
@@ -166,6 +171,7 @@ Avoid strong gradients or obvious photographic paper textures.
 Add a cropped hand-drawn grid or hashtag-like doodle.
 
 Appearance:
+
 - Several intersecting diagonal and near-vertical lines.
 - Mostly black ink, with one or two muted reddish-brown or olive-toned lines.
 - The lines extend beyond the top and left viewport edges.
@@ -179,6 +185,7 @@ The doodle should be partially offscreen, as in the reference.
 Add a second cropped grid doodle.
 
 Appearance:
+
 - Several long, slanted, intersecting black lines.
 - Lines enter from the lower-right edge.
 - Some strokes are cropped by the bottom and right edges.
@@ -187,6 +194,7 @@ Appearance:
 ### Additional decorative marks
 
 Add scattered small doodles:
+
 - Tiny starbursts on the left side.
 - Small sparkle shapes around the laptop.
 - A few black accent strokes around the input.
@@ -200,6 +208,7 @@ These marks should look hand-drawn, not like random Unicode symbols placed in te
 Create a dedicated `BackgroundDoodles` React component.
 
 Use inline SVG with:
+
 - `stroke="#11100D"` or similar.
 - `fill="none"` for outlined shapes.
 - Rounded stroke caps and joins.
@@ -223,6 +232,7 @@ Position it centrally above the text input.
 Illustrate an open laptop in a slightly tilted, three-quarter perspective.
 
 The illustration should have:
+
 - A rectangular screen with rounded or slightly imperfect corners.
 - A warm beige screen fill.
 - A black hand-drawn outer outline.
@@ -256,6 +266,7 @@ It must not resemble a realistic photograph, 3D render, or standard flat corpora
 A stylized cartoon hand and forearm should emerge from the laptop screen and extend downward and toward the right.
 
 The arm should:
+
 - Have a white or very pale warm fill.
 - Use a bold black outline.
 - Include a sleeve or cuff near the laptop screen.
@@ -267,6 +278,7 @@ The hand is important to the personality of the composition. Do not omit it or r
 ### Nearby motion and sparkle details
 
 Add:
+
 - A few black radial lines extending from the laptop's right side.
 - Small sparkle doodles near the left side.
 - A small outlined sparkle near the upper-right of the illustration.
@@ -276,6 +288,7 @@ Add:
 Create a standalone `LaptopIllustration` component using inline SVG.
 
 This gives the most control over:
+
 - Perspective.
 - Stroke width.
 - Layering.
@@ -308,6 +321,7 @@ Create a long, horizontal, pill-like text-entry area centered beneath the laptop
 ### Shape and dimensions
 
 Desktop reference:
+
 - Approximately 910 pixels wide.
 - Approximately 110 pixels tall.
 - Large rounded corners.
@@ -316,6 +330,7 @@ Desktop reference:
 - Bold black outline.
 
 For implementation, use fluid sizing such as:
+
 - `width: min(100%, 910px)`.
 - A desktop height around 108–112 pixels.
 - Responsive horizontal padding.
@@ -349,6 +364,7 @@ The placeholder must read:
 `Enter your text here...`
 
 Typography:
+
 - Friendly, rounded, informal.
 - Black text.
 - Approximately 20–22 pixels on desktop.
@@ -370,6 +386,7 @@ Do not permanently overlay a fake cursor that interferes with actual text input.
 At the far-right side of the input, include a hand-drawn paper-plane/send icon.
 
 Requirements:
+
 - Black outline.
 - No filled bright color.
 - Approximately 35–42 pixels in visual size.
@@ -380,6 +397,7 @@ Requirements:
 Use an existing installed icon library only if it offers an appropriate outline icon. Otherwise, create the icon as a small inline SVG.
 
 The icon should be a real interactive button with:
+
 - An accessible name such as "Send text".
 - Keyboard support.
 - A visible focus state.
@@ -410,6 +428,7 @@ Exact displayed text:
 ### Typography
 
 The heading is:
+
 - Uppercase.
 - Bold.
 - Black.
@@ -420,6 +439,7 @@ The heading is:
 Use a rounded, handwritten display font.
 
 Possible font choices, in order of preference:
+
 1. A suitable handwritten or playful display font already available in the project.
 2. `Patrick Hand SC`.
 3. `Kalam` with a bold weight if available.
@@ -453,6 +473,7 @@ Keep them balanced around the text without making the heading too wide.
 The bottom section contains eight pill-shaped buttons arranged into two centered rows.
 
 Each button includes:
+
 1. A black outline icon on the left.
 2. A text label.
 3. A warm beige fill.
@@ -463,12 +484,14 @@ These are functional controls, not decorative labels.
 ### Exact labels and icons
 
 Row 1:
+
 1. CEO — sparkle icon.
 2. Gen Z — star icon.
 3. Lawyer — scales-of-justice icon.
 4. Professional — briefcase icon.
 
 Row 2:
+
 1. Friendly — smile icon.
 2. Roast — flame icon.
 3. Romantic — heart icon.
@@ -479,6 +502,7 @@ Preserve the exact spelling and capitalization.
 ### Button dimensions
 
 Approximate desktop dimensions:
+
 - Height: 64 pixels.
 - Width: content-dependent, approximately 155–215 pixels.
 - Border radius: fully rounded pill.
@@ -493,6 +517,7 @@ The buttons should not all have an identical fixed width if doing so would disto
 ### Button spacing
 
 Desktop:
+
 - Center the rows horizontally.
 - Use approximately 26–30 pixels of horizontal space between buttons.
 - Use approximately 24–30 pixels of vertical space between the two rows.
@@ -507,6 +532,7 @@ Do not position each button with hardcoded absolute coordinates.
 Use the same beige family as the input, perhaps with very slight tonal variation.
 
 Each button should have:
+
 - A black outline.
 - A pill shape.
 - A black line-art icon.
@@ -520,11 +546,13 @@ Do not add strong shadows or gradient fills.
 Use consistent, monochrome outline icons.
 
 Preferred implementation:
+
 - Reuse the project's existing icon library if suitable.
 - If `lucide-react` is already installed, use its outline icons where appropriate.
 - Otherwise, use small inline SVGs.
 
 Suggested icon mappings:
+
 - CEO: `Sparkles`
 - Gen Z: `Star`
 - Lawyer: `Scale`
@@ -541,6 +569,7 @@ Use black strokes, no multicolor fills, and consistent stroke widths.
 ### Typography
 
 Button labels should be:
+
 - Approximately 19–21 pixels on desktop.
 - Black.
 - Medium or semibold.
@@ -556,11 +585,13 @@ Each button represents a selectable text style or personality.
 Implement a selected state.
 
 When a user selects a tone:
+
 - Store the selected tone in React state.
 - Apply a subtle visual change.
 - Preserve the original design language.
 
 Possible selected-state changes:
+
 - Slightly darker beige fill.
 - A thicker or slightly offset black outline.
 - A small transform of approximately `translateY(-1px)`.
@@ -585,12 +616,14 @@ Typography is an important part of the illustrated identity.
 The reference uses an informal, rounded, handwritten appearance.
 
 Use a consistent system:
+
 - Heading: bold, uppercase, playful display face.
 - Input placeholder and entered text: rounded, friendly, readable.
 - Button labels: rounded, medium-weight, informal.
 - Validation and accessibility text: readable and visually understated.
 
 Potential font combination:
+
 - `Patrick Hand SC` for the main heading.
 - `Patrick Hand` or `Kalam` for input and button labels.
 
@@ -664,19 +697,23 @@ Do not turn the interface into an animation showcase.
 Recommended interactions:
 
 ### Tone buttons
+
 - Slight movement on hover.
 - Subtle fill adjustment.
 - Quick transition around 150–220ms.
 - Clear pressed state.
 
 ### Send button
+
 - Slight movement or scale on hover.
 - Subtle active state when clicked.
 
 ### Laptop illustration
+
 Optionally introduce a very gentle floating animation, but only if it does not detract from the hand-drawn aesthetic.
 
 Keep it extremely subtle:
+
 - Small vertical movement.
 - Slow duration.
 - No exaggerated rotation.
@@ -685,6 +722,7 @@ Keep it extremely subtle:
 Respect `prefers-reduced-motion`.
 
 Avoid:
+
 - Scroll-jacking.
 - Large parallax effects.
 - Strong spring animations.
@@ -719,18 +757,21 @@ Adapt this to the repository's actual conventions. Do not create duplicate struc
 ### Component responsibilities
 
 `BackgroundDoodles`
+
 - Decorative corner grids.
 - Starbursts.
 - Sparkles.
 - Accent strokes.
 
 `LaptopIllustration`
+
 - Laptop body and screen.
 - Keyboard and trackpad.
 - Emerging hand.
 - Nearby motion marks and sparkles.
 
 `TextInput`
+
 - Input state or controlled value.
 - Placeholder.
 - Send button.
@@ -738,20 +779,24 @@ Adapt this to the repository's actual conventions. Do not create duplicate struc
 - Submission callback.
 
 `VibathonHeading`
+
 - Heading text.
 - Left and right decorative marks.
 
 `ToneSelector`
+
 - Available tone definitions.
 - Selected-tone state.
 - Layout of both rows.
 
 `ToneButton`
+
 - Individual icon and label.
 - Accessible button behavior.
 - Hover, focus, and selected states.
 
 `VibathonPage`
+
 - Main layout.
 - Shared state.
 - Component composition.
@@ -777,12 +822,12 @@ Suggested variables:
 
 ```css
 :root {
-  --paper: #FAF9F4;
-  --paper-alt: #F5F1E8;
-  --parchment: #E6D7BC;
-  --parchment-dark: #D7C19E;
-  --ink: #11100D;
-  --ink-muted: #39352B;
+  --paper: #faf9f4;
+  --paper-alt: #f5f1e8;
+  --parchment: #e6d7bc;
+  --parchment-dark: #d7c19e;
+  --ink: #11100d;
+  --ink-muted: #39352b;
 
   --outline-width: 2.5px;
   --pill-radius: 999px;
@@ -854,6 +899,7 @@ After implementation:
 If browser automation or screenshot comparison is available, use it to refine the design.
 
 Pay particular attention to:
+
 - The laptop illustration's position and proportions.
 - The input's width and height.
 - The amount of space between the laptop and input.
@@ -891,6 +937,7 @@ Build the actual interface, not a rough approximation using generic components.
 The finished result should immediately communicate the same visual identity as the reference: warm paper, black ink, playful hand-drawn illustrations, expressive doodles, and a clean central text interaction.
 
 After implementation, provide a concise report stating:
+
 - Which files were created or modified.
 - Which interactions work.
 - Whether the page was tested at desktop and mobile sizes.

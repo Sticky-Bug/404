@@ -29,7 +29,7 @@ jobs:
           fi
       - name: Prompt logs are append-only (nobody may change or delete a logged line)
         id: verify
-        shell: bash  # explicit bash enables pipefail, so a failed verify fails the step despite tee
+        shell: bash # explicit bash enables pipefail, so a failed verify fails the step despite tee
         run: python3 scripts/log_prompt.py verify --base "${{ steps.refs.outputs.base }}" --head "${{ steps.refs.outputs.head }}" | tee verify.txt
       - name: Record the tampering as a GitHub issue
         if: failure() && steps.verify.outcome == 'failure'

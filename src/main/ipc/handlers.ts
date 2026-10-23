@@ -34,7 +34,9 @@ const ProviderOnlySchema = z.object({
 })
 
 const SendEmailSchema = z.object({
-  to: z.array(z.string().email('Please enter a valid "To" email address')).min(1, 'At least one recipient is required'),
+  to: z
+    .array(z.string().email('Please enter a valid "To" email address'))
+    .min(1, 'At least one recipient is required'),
   cc: z.array(z.string().email('Please enter a valid "Cc" email address')).optional(),
   bcc: z.array(z.string().email('Please enter a valid "Bcc" email address')).optional(),
   subject: z.string().min(1, 'Subject line cannot be empty').max(500),

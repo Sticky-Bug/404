@@ -77,10 +77,15 @@ export interface VibeWriteBridge {
   clearApiKey(input: { provider: ProviderId }): Promise<OperationResult>
   testProvider(input: { provider: ProviderId }): Promise<OperationResult>
   gmailGetStatus(): Promise<GmailAccountStatus>
-  gmailConnect(credentials?: { clientId?: string; clientSecret?: string }): Promise<GmailAccountStatus>
+  gmailConnect(credentials?: {
+    clientId?: string
+    clientSecret?: string
+  }): Promise<GmailAccountStatus>
   gmailDisconnect(): Promise<{ success: boolean }>
   gmailSendEmail(input: SendEmailInput): Promise<SendEmailResult>
-  gmailSaveDraft(input: SendEmailInput): Promise<{ success: boolean; draftId?: string; error?: string }>
+  gmailSaveDraft(
+    input: SendEmailInput
+  ): Promise<{ success: boolean; draftId?: string; error?: string }>
 }
 
 declare global {

@@ -1,4 +1,4 @@
-import { app, shell, BrowserWindow } from 'electron'
+import { app, shell, BrowserWindow, session } from 'electron'
 import { join } from 'path'
 import { electronApp, optimizer, is } from '@electron-toolkit/utils'
 import icon from '../../resources/icon.png?asset'
@@ -46,6 +46,15 @@ function createWindow(): void {
 app.whenReady().then(() => {
   // Set app user model id for windows
   electronApp.setAppUserModelId('com.vibewrite.app')
+
+  // Handle microphone permissions for speech recognition
+  session.defaultSession.setPermissionRequestHandler((_webContents, permission, callback) => {
+    if (permission === 'media') {
+      callback(true)
+      return
+    }
+    callback(false)
+  })
 
   // Load safeStorage encrypted keys
   keyStore.init()

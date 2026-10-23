@@ -339,6 +339,176 @@ body {
   display: block;
 }
 
+/* Voice Dictation (Speech-to-Text) Microphone Control */
+.sketch-mic-button {
+  width: 46px;
+  height: 46px;
+  border-radius: 50%;
+  background: var(--parchment-dark);
+  border: 2px solid var(--ink);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8px;
+  box-shadow: 2px 2px 0 var(--ink);
+  transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+  flex-shrink: 0;
+  position: relative;
+  color: var(--ink);
+}
+
+.sketch-mic-button:hover:not(:disabled) {
+  transform: scale(1.08) rotate(-3deg);
+  background-color: #cca97e;
+  box-shadow: 3px 3px 0 var(--ink);
+}
+
+.sketch-mic-button:active:not(:disabled) {
+  transform: scale(0.96);
+  box-shadow: 1px 1px 0 var(--ink);
+}
+
+.sketch-mic-button:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+.sketch-mic-button.is-unsupported {
+  opacity: 0.55;
+  filter: grayscale(0.5);
+}
+
+/* Active Listening State with tactile sketch pulse */
+.sketch-mic-button.is-listening {
+  background-color: #fca5a5;
+  border-color: #7f1d1d;
+  color: #7f1d1d;
+  box-shadow: 2px 2px 0 #7f1d1d;
+  animation: sketch-mic-pulse 1.3s ease-in-out infinite;
+}
+
+.sketch-input-container.listening-border {
+  border-color: #7f1d1d;
+  box-shadow: 0 4px 0 rgba(127, 29, 29, 0.25);
+}
+
+@keyframes sketch-mic-pulse {
+  0% {
+    transform: scale(1);
+    box-shadow:
+      0 0 0 0 rgba(220, 38, 38, 0.45),
+      2px 2px 0 #7f1d1d;
+  }
+  50% {
+    transform: scale(1.08);
+    box-shadow:
+      0 0 0 7px rgba(220, 38, 38, 0),
+      3px 3px 0 #7f1d1d;
+  }
+  100% {
+    transform: scale(1);
+    box-shadow:
+      0 0 0 0 rgba(220, 38, 38, 0),
+      2px 2px 0 #7f1d1d;
+  }
+}
+
+.mic-svg {
+  display: block;
+}
+
+.mic-active-pulse {
+  animation: mic-inner-pulse 1s ease-in-out infinite alternate;
+}
+
+@keyframes mic-inner-pulse {
+  0% {
+    opacity: 0.85;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+/* Ribbon STT Voice Status Indicators */
+.ribbon-stt-status {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.ribbon-stt-status.listening {
+  color: #991b1b;
+}
+
+.ribbon-stt-status.error {
+  color: #b45309;
+}
+
+.stt-pulsing-dot {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background-color: #dc2626;
+  border: 1px solid #7f1d1d;
+  animation: stt-dot-pulse 1s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  display: inline-block;
+}
+
+@keyframes stt-dot-pulse {
+  0%,
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.4;
+    transform: scale(0.85);
+  }
+}
+
+.stt-status-text {
+  font-family: var(--font-hand);
+  letter-spacing: 0.02em;
+}
+
+.stt-status-hint {
+  font-size: 0.75rem;
+  opacity: 0.75;
+  font-weight: normal;
+}
+
+.stt-error-icon {
+  font-size: 0.85rem;
+}
+
+.stt-error-text {
+  font-size: 0.8rem;
+  max-width: 480px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.stt-clear-error-btn {
+  background: none;
+  border: none;
+  font-size: 0.75rem;
+  cursor: pointer;
+  padding: 0 4px;
+  color: var(--ink);
+  opacity: 0.6;
+  transition: opacity 0.15s ease;
+}
+
+.stt-clear-error-btn:hover {
+  opacity: 1;
+}
+
 .sketch-input-ribbon {
   width: 100%;
   display: flex;
@@ -1394,4 +1564,3 @@ body {
   line-height: 1.4;
   color: var(--ink);
 }
-

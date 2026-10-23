@@ -86,9 +86,7 @@ class GmailService {
     clientSecret?: string
   }): Promise<GmailAccountStatus> {
     const clientId =
-      credentials?.clientId?.trim() ||
-      process.env.GOOGLE_CLIENT_ID ||
-      this.getFallbackClientId()
+      credentials?.clientId?.trim() || process.env.GOOGLE_CLIENT_ID || this.getFallbackClientId()
 
     const clientSecret =
       credentials?.clientSecret?.trim() ||
@@ -262,7 +260,10 @@ class GmailService {
     if (!this.tokens) return null
     if (this.tokens.isDevMode) return 'dev-token'
 
-    if (this.tokens.accessToken && (!this.tokens.expiryDate || this.tokens.expiryDate > Date.now() + 60000)) {
+    if (
+      this.tokens.accessToken &&
+      (!this.tokens.expiryDate || this.tokens.expiryDate > Date.now() + 60000)
+    ) {
       return this.tokens.accessToken
     }
 
@@ -473,7 +474,10 @@ class GmailService {
 
       if (!res.ok) {
         const text = await res.text()
-        return { success: false, error: `Failed to save draft (${res.status}): ${text.slice(0, 100)}` }
+        return {
+          success: false,
+          error: `Failed to save draft (${res.status}): ${text.slice(0, 100)}`
+        }
       }
 
       const data = (await res.json()) as { id?: string }

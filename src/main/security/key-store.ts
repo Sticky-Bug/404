@@ -107,7 +107,10 @@ class KeyStore {
   }
 
   public setKey(provider: ProviderId, key: string): { success: boolean; message: string } {
-    const trimmed = key.trim().replace(/^["']|["']$/g, '').trim()
+    const trimmed = key
+      .trim()
+      .replace(/^["']|["']$/g, '')
+      .trim()
     if (!trimmed) {
       return { success: false, message: 'Key cannot be empty.' }
     }
@@ -189,7 +192,9 @@ class KeyStore {
     return providers.map((provider) => {
       const hasCustom = Boolean(this.memoryKeys.get(provider))
       const isCustomMode = this.apiMode === 'custom'
-      const configured = isCustomMode ? hasCustom : Boolean(this.defaultKeys[provider] || loadDefaultKeys()[provider])
+      const configured = isCustomMode
+        ? hasCustom
+        : Boolean(this.defaultKeys[provider] || loadDefaultKeys()[provider])
       const statusInfo = this.statuses.get(provider) || { lastStatus: 'not-tested' }
 
       return {

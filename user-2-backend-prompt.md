@@ -24,43 +24,50 @@ Implement exactly these methods and shapes in the preload/main process. User 1 i
 The renderer calls only `window.vibewrite`. Do not use direct Node APIs or call cloud APIs from React.
 
 ```ts
-type ProviderId = 'gemini' | 'groq' | 'openrouter';
-type PersonaId = 'executive' | 'supportive' | 'legal' | 'gen-z' | 'diplomatic' | 'friendly' | 'persuasive' | 'custom';
-type ToneIntensity = 'subtle' | 'balanced' | 'bold';
-type ProviderName = ProviderId | 'local';
+type ProviderId = 'gemini' | 'groq' | 'openrouter'
+type PersonaId =
+  | 'executive'
+  | 'supportive'
+  | 'legal'
+  | 'gen-z'
+  | 'diplomatic'
+  | 'friendly'
+  | 'persuasive'
+  | 'custom'
+type ToneIntensity = 'subtle' | 'balanced' | 'bold'
+type ProviderName = ProviderId | 'local'
 
 type RewriteRequest = {
-  draft: string;
-  personaId: PersonaId;
-  intensity: ToneIntensity;
-  customInstruction?: string;
-};
+  draft: string
+  personaId: PersonaId
+  intensity: ToneIntensity
+  customInstruction?: string
+}
 
 type RewriteResponse =
   | { ok: true; text: string; provider: ProviderName; model: string; fallbackUsed: boolean }
-  | { ok: false; error: string; providersAttempted: ProviderId[] };
+  | { ok: false; error: string; providersAttempted: ProviderId[] }
 
 type ProviderStatus = {
-  provider: ProviderId;
-  configured: boolean;
-  lastStatus: 'ok' | 'error' | 'rate-limited' | 'not-tested';
-  message?: string;
-};
+  provider: ProviderId
+  configured: boolean
+  lastStatus: 'ok' | 'error' | 'rate-limited' | 'not-tested'
+  message?: string
+}
 
-type OperationResult = { success: boolean; message: string };
+type OperationResult = { success: boolean; message: string }
 
 interface VibeWriteBridge {
-  getProviderStatus(): Promise<ProviderStatus[]>;
-  generateRewrite(request: RewriteRequest): Promise<RewriteResponse>;
-  generateOfflineRewrite(request: RewriteRequest): Promise<RewriteResponse>;
-  setApiKey(input: { provider: ProviderId; key: string }): Promise<OperationResult>;
-  clearApiKey(input: { provider: ProviderId }): Promise<OperationResult>;
-  testProvider(input: { provider: ProviderId }): Promise<OperationResult>;
+  getProviderStatus(): Promise<ProviderStatus[]>
+  generateRewrite(request: RewriteRequest): Promise<RewriteResponse>
+  generateOfflineRewrite(request: RewriteRequest): Promise<RewriteResponse>
+  setApiKey(input: { provider: ProviderId; key: string }): Promise<OperationResult>
+  clearApiKey(input: { provider: ProviderId }): Promise<OperationResult>
+  testProvider(input: { provider: ProviderId }): Promise<OperationResult>
 }
 ```
 
 The `generateRewrite` call tries configured cloud providers sequentially (Gemini, then Groq, then optional OpenRouter). If all cloud attempts fail, return `{ ok: false, ... }`. Do not silently replace cloud output with local output. The UI then offers `generateOfflineRewrite`, which returns a result with `provider: 'local'` and a clear low-quality/offline label.
-
 
 ## Implementation requirements
 

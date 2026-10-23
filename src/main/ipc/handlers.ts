@@ -6,6 +6,7 @@ import { generateBasicOfflineRewrite } from '../ai/local-fallback'
 import { testGemini } from '../ai/providers/gemini'
 import { testGroq } from '../ai/providers/groq'
 import { testOpenRouter } from '../ai/providers/openrouter'
+import { gmailService } from '../gmail/service'
 
 const RewriteRequestSchema = z.object({
   draft: z.string().min(1).max(10000),
@@ -31,6 +32,21 @@ const SetApiKeySchema = z.object({
 const ProviderOnlySchema = z.object({
   provider: z.enum(['gemini', 'groq', 'openrouter'])
 })
+
+const SendEmailSchema = z.object({
+  to: z.array(z.string().email('Please enter a valid "To" email address')).min(1, 'At least one recipient is required'),
+  cc: z.array(z.string().email('Please enter a valid "Cc" email address')).optional(),
+  bcc: z.array(z.string().email('Please enter a valid "Bcc" email address')).optional(),
+  subject: z.string().min(1, 'Subject line cannot be empty').max(500),
+  body: z.string().min(1, 'Email body cannot be empty').max(50000)
+})
+
+const GmailConnectSchema = z
+  .object({
+    clientId: z.string().optional(),
+    clientSecret: z.string().optional()
+  })
+  .optional()
 
 export function registerIpcHandlers(): void {
   // Get API Mode (automatic or custom)
@@ -125,5 +141,41 @@ export function registerIpcHandlers(): void {
       model: res.model,
       fallbackUsed: res.fallbackUsed
     }
+  })
+
+  // Gmail integration handlers
+  ipcMain.handle('vibewrite:gmailGetStatus', async () => {
+    return gmailService.getStatus()
+  })
+
+  ipcMain.handle('vibewrite:gmailConnect', async (_, input) => {
+    const parsed = GmailConnectSchema.safeParse(input)
+    return gmailService.connect(parsed.success ? parsed.data : undefined)
+  })
+
+  ipcMain.handle('vibewrite:gmailDisconnect', async () => {
+    await gmailService.disconnect()
+    return { success: true }
+  })
+
+  ipcMain.handle('vibewrite:gmailSendEmail', async (_, input) => {
+    const parsed = SendEmailSchema.safeParse(input)
+    if (!parsed.success) {
+      const issueMsg = parsed.error.issues[0]?.message || 'Invalid email data'
+      return {
+        success: false,
+        errorCode: 'VALIDATION_ERROR',
+        userMessage: `Validation failed: ${issueMsg}`
+      }
+    }
+    return gmailService.sendEmail(parsed.data)
+  })
+
+  ipcMain.handle('vibewrite:gmailSaveDraft', async (_, input) => {
+    const parsed = SendEmailSchema.safeParse(input)
+    if (!parsed.success) {
+      return { success: false, error: 'Invalid draft data' }
+    }
+    return gmailService.saveDraft(parsed.data)
   })
 }

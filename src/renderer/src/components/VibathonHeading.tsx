@@ -12,7 +12,7 @@ export const VibathonHeading: React.FC = () => {
         </g>
       </svg>
 
-      <h1 className="vibathon-heading-text">OUR PERSONA's</h1>
+      <h1 className="vibathon-heading-text">OUR PERSONA&apos;S</h1>
 
       {/* Right Flourish Strokes */}
       <svg className="heading-flourish right" viewBox="0 0 50 30" aria-hidden="true">

@@ -11,7 +11,13 @@ const vibewriteBridge = {
     ipcRenderer.invoke('vibewrite:generateOfflineRewrite', request),
   setApiKey: (input: unknown) => ipcRenderer.invoke('vibewrite:setApiKey', input),
   clearApiKey: (input: unknown) => ipcRenderer.invoke('vibewrite:clearApiKey', input),
-  testProvider: (input: unknown) => ipcRenderer.invoke('vibewrite:testProvider', input)
+  testProvider: (input: unknown) => ipcRenderer.invoke('vibewrite:testProvider', input),
+  gmailGetStatus: () => ipcRenderer.invoke('vibewrite:gmailGetStatus'),
+  gmailConnect: (credentials?: unknown) =>
+    ipcRenderer.invoke('vibewrite:gmailConnect', credentials),
+  gmailDisconnect: () => ipcRenderer.invoke('vibewrite:gmailDisconnect'),
+  gmailSendEmail: (input: unknown) => ipcRenderer.invoke('vibewrite:gmailSendEmail', input),
+  gmailSaveDraft: (input: unknown) => ipcRenderer.invoke('vibewrite:gmailSaveDraft', input)
 }
 
 if (process.contextIsolated) {

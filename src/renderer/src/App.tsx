@@ -14,6 +14,7 @@ import { VibathonHeading } from './components/VibathonHeading'
 import { ToneSelector } from './components/ToneSelector'
 import { TONES_CONFIG } from './data/tones'
 import { ResultSketchCard, type RewriteResultData } from './components/ResultSketchCard'
+import { EmailDeliveryPanel } from './components/EmailDeliveryPanel'
 import { SettingsDialog } from './components/SettingsDialog'
 import { StatusMessage, type StatusToast } from './components/StatusMessage'
 
@@ -296,6 +297,13 @@ export function App(): React.JSX.Element {
           onCopy={handleCopyText}
           onDismiss={() => setResult(null)}
           onTryOffline={handleTryOffline}
+        />
+
+        {/* 6. Email Participants & Delivery Panel (RFC 2822 & Gmail API) */}
+        <EmailDeliveryPanel
+          currentVibeText={result?.rewrittenText}
+          currentVibeTone={result?.toneLabel}
+          onToast={setToast}
         />
       </main>
 

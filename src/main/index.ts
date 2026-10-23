@@ -3,6 +3,7 @@ import { join } from 'path'
 import { electronApp, optimizer, is } from '@electron-toolkit/utils'
 import icon from '../../resources/icon.png?asset'
 import { keyStore } from './security/key-store'
+import { gmailService } from './gmail/service'
 import { registerIpcHandlers } from './ipc/handlers'
 
 function createWindow(): void {
@@ -48,6 +49,7 @@ app.whenReady().then(() => {
 
   // Load safeStorage encrypted keys
   keyStore.init()
+  gmailService.init()
 
   // Register Zod-validated IPC handlers for window.vibewrite
   registerIpcHandlers()
